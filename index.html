@@ -5,233 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Día del Padre — Noche de Juegos</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<style>
-  * { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --color-text-primary: #1a1a1a;
-    --color-text-secondary: #6b6b6b;
-    --color-background-primary: #ffffff;
-    --color-background-secondary: #f5f4f2;
-    --color-border-primary: #1a1a1a;
-    --color-border-secondary: #c9c7c0;
-    --color-border-tertiary: #e3e1db;
-    --border-radius-lg: 16px;
-    --border-radius-md: 10px;
-    --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  }
-  body { font-family: var(--font-sans); background: var(--color-background-secondary); color: var(--color-text-primary); min-height: 100vh; }
-  .app { max-width: 480px; margin: 0 auto; min-height: 100vh; background: var(--color-background-primary); box-shadow: 0 0 40px rgba(0,0,0,0.06); position: relative; overflow-x: hidden; }
-
-  .screen { display: none; padding: 0; }
-  .screen.active { display: block; }
-
-  .hero { text-align: center; padding: 2.5rem 1.25rem 1rem; }
-  .hero-badge { display: inline-block; background: #FAC775; color: #633806; font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px; margin-bottom: 1rem; letter-spacing: 0.5px; }
-  .hero-title { font-size: 28px; font-weight: 700; line-height: 1.2; margin-bottom: 0.4rem; }
-  .hero-sub { font-size: 14px; color: var(--color-text-secondary); margin-bottom: 1.5rem; }
-
-  .room-code-box { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; text-align: center; margin-bottom: 1rem; border: 1px solid var(--color-border-tertiary); }
-  .code-label { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 0.4rem; }
-  .code-value { font-size: 36px; font-weight: 700; letter-spacing: 8px; }
-
-  input[type="text"], input[type="number"], select, textarea {
-    width: 100%; padding: 12px 14px; font-size: 16px; border: 1px solid var(--color-border-secondary);
-    border-radius: var(--border-radius-md); background: var(--color-background-primary); color: var(--color-text-primary);
-    outline: none; margin-bottom: 0.75rem; font-family: var(--font-sans);
-  }
-  input:focus, select:focus, textarea:focus { border-color: #378ADD; box-shadow: 0 0 0 2px rgba(55,138,221,0.15); }
-  textarea { resize: vertical; min-height: 60px; }
-
-  .btn { display: block; width: 100%; padding: 13px; font-size: 15px; font-weight: 600; border-radius: var(--border-radius-md); border: 1px solid var(--color-border-secondary); background: var(--color-background-primary); color: var(--color-text-primary); cursor: pointer; margin-bottom: 0.6rem; transition: background 0.15s; text-align: center; }
-  .btn:hover { background: var(--color-background-secondary); }
-  .btn:active { transform: scale(0.98); }
-  .btn-primary { background: #185FA5; color: #fff; border-color: #185FA5; }
-  .btn-primary:hover { background: #0C447C; }
-  .btn-success { background: #3B6D11; color: #fff; border-color: #3B6D11; }
-  .btn-success:hover { background: #27500A; }
-  .btn-sm { padding: 9px 14px; font-size: 13px; width: auto; display: inline-block; margin-bottom: 0; }
-  .btn-amber { background: #BA7517; color: #fff; border-color: #BA7517; }
-  .btn-amber:hover { background: #854F0B; }
-  .btn-purple { background: #5B4FC4; color: #fff; border-color: #5B4FC4; }
-  .btn-purple:hover { background: #433699; }
-  .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-  .btn-pill { border-radius: 999px; }
-
-  .player-list { margin: 1rem 0; }
-  .player-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); margin-bottom: 6px; font-size: 14px; }
-  .player-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 600; font-size: 13px; flex-shrink: 0; }
-  .av-blue { background: #B5D4F4; color: #0C447C; } .av-coral { background: #F5C4B3; color: #712B13; }
-  .av-teal { background: #9FE1CB; color: #085041; } .av-amber { background: #FAC775; color: #633806; }
-  .av-purple { background: #CECBF6; color: #3C3489; } .av-pink { background: #F4C0D1; color: #72243E; }
-  .av-green { background: #C0DD97; color: #27500A; } .av-gray { background: #D3D1C7; color: #444441; }
-
-  .game-card { background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin-bottom: 0.75rem; cursor: pointer; transition: border-color 0.15s, background 0.15s; display: flex; align-items: center; gap: 14px; }
-  .game-card:hover { border-color: var(--color-border-primary); background: var(--color-background-secondary); }
-  .game-card.disabled { opacity: 0.5; cursor: default; }
-  .game-icon { font-size: 28px; flex-shrink: 0; }
-  .game-title { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-  .game-desc { font-size: 12px; color: var(--color-text-secondary); line-height: 1.4; }
-
-  .jeopardy-grid { display: grid; gap: 5px; margin-bottom: 1rem; }
-  .j-category { background: #185FA5; color: #fff; padding: 6px 3px; text-align: center; font-size: 9px; font-weight: 600; border-radius: 6px; line-height: 1.25; min-height: 40px; display: flex; align-items: center; justify-content: center; }
-  .j-cell { background: #0C447C; color: #fff; padding: 6px 3px; text-align: center; font-size: 12px; font-weight: 600; border-radius: 6px; cursor: pointer; min-height: 36px; display: flex; align-items: center; justify-content: center; transition: background 0.15s; position: relative; }
-  .j-cell:hover { background: #042C53; }
-  .j-cell.used { background: var(--color-background-secondary); color: var(--color-text-secondary); cursor: default; }
-  .j-cell.dd::after { content: '⭐'; position: absolute; top: 1px; right: 2px; font-size: 8px; }
-
-  .modal-overlay { position: relative; min-height: 340px; background: rgba(0,0,0,0.55); border-radius: var(--border-radius-lg); display: flex; align-items: center; justify-content: center; margin-bottom: 1rem; }
-  .modal-box { background: var(--color-background-primary); border-radius: var(--border-radius-lg); padding: 1.25rem; width: 90%; border: 1px solid var(--color-border-tertiary); }
-  .modal-title { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 0.5rem; }
-  .modal-q { font-size: 16px; font-weight: 600; margin-bottom: 1rem; line-height: 1.4; }
-  .modal-answer { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; font-size: 14px; margin-bottom: 1rem; display: none; }
-  .btn-row { display: flex; gap: 8px; }
-  .btn-row .btn { margin-bottom: 0; }
-
-  .sf-statement { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; text-align: center; margin: 1rem 0; font-size: 16px; font-weight: 600; line-height: 1.5; min-height: 100px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--color-border-tertiary); }
-  .vote-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
-  .vote-btn { padding: 16px; border-radius: var(--border-radius-lg); font-size: 15px; font-weight: 600; cursor: pointer; border: 1px solid var(--color-border-tertiary); transition: all 0.15s; }
-  .vote-fish { background: #9FE1CB; color: #085041; border-color: #5DCAA5; }
-  .vote-fish:hover { background: #5DCAA5; }
-  .vote-real { background: #B5D4F4; color: #0C447C; border-color: #85B7EB; }
-  .vote-real:hover { background: #85B7EB; }
-
-  .herd-q { background: #FAEEDA; color: #412402; border-radius: var(--border-radius-lg); padding: 1rem 1.25rem; margin: 1rem 0; font-size: 15px; font-weight: 600; line-height: 1.5; text-align: center; }
-  .herd-input-area { margin-bottom: 1rem; }
-  .answers-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 1rem; }
-  .answer-card { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px; font-size: 13px; border: 1px solid var(--color-border-tertiary); }
-  .answer-name { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 2px; }
-  .answer-text { font-weight: 600; }
-  .answer-card.winner { background: #C0DD97; border-color: #639922; }
-  .answer-card.winner .answer-text { color: #27500A; }
-  .answer-card.loser { opacity: 0.55; }
-
-  .scores-table { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-  .scores-table th { font-size: 11px; color: var(--color-text-secondary); font-weight: 600; text-align: left; padding: 6px 8px; border-bottom: 1px solid var(--color-border-tertiary); }
-  .scores-table td { padding: 8px; font-size: 14px; border-bottom: 1px solid var(--color-border-tertiary); }
-  .rank-1 { font-weight: 700; color: #BA7517; }
-
-  .loading { text-align: center; padding: 2rem; color: var(--color-text-secondary); font-size: 14px; }
-  .spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid var(--color-border-tertiary); border-top-color: #378ADD; border-radius: 50%; animation: spin 0.7s linear infinite; margin-right: 8px; vertical-align: middle; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-
-  .section-label { font-size: 11px; color: var(--color-text-secondary); font-weight: 600; letter-spacing: 0.5px; margin-bottom: 0.5rem; display: flex; align-items: center; justify-content: space-between; }
-  .divider { height: 1px; background: var(--color-border-tertiary); margin: 1rem 0; }
-
-  .topbar { display: flex; align-items: center; justify-content: space-between; padding: 0.9rem 1.25rem; border-bottom: 1px solid var(--color-border-tertiary); margin-bottom: 0.5rem; }
-  .topbar-title { font-size: 14px; font-weight: 700; }
-  .topbar-back { font-size: 13px; color: var(--color-text-secondary); cursor: pointer; }
-  .topbar-back:hover { color: var(--color-text-primary); }
-
-  .progress-bar { height: 4px; background: var(--color-border-tertiary); border-radius: 2px; margin-bottom: 1rem; overflow: hidden; }
-  .progress-fill { height: 100%; background: #378ADD; border-radius: 2px; transition: width 0.3s; }
-
-  .tabs { display: flex; gap: 0; border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); overflow: hidden; margin-bottom: 1rem; }
-  .tab { flex: 1; padding: 9px; font-size: 13px; text-align: center; cursor: pointer; background: var(--color-background-secondary); color: var(--color-text-secondary); border: none; transition: all 0.15s; }
-  .tab.active { background: var(--color-background-primary); color: var(--color-text-primary); font-weight: 600; }
-
-  .tag { display: inline-block; font-size: 11px; padding: 3px 8px; border-radius: 12px; }
-  .tag-host { background: #CECBF6; color: #3C3489; }
-  .tag-link { color: #185FA5; cursor: pointer; font-weight: 600; font-size: 11px; }
-
-  .counter { display: flex; align-items: center; gap: 8px; justify-content: center; margin-bottom: 1rem; }
-  .count-num { font-size: 32px; font-weight: 700; }
-  .count-label { font-size: 13px; color: var(--color-text-secondary); }
-
-  .text-center { text-align: center; }
-  .text-sm { font-size: 13px; color: var(--color-text-secondary); }
-  .mt1 { margin-top: 1rem; }
-  .mb1 { margin-bottom: 1rem; }
-  .p1 { padding: 1rem 0; }
-  .px125 { padding-left: 1.25rem; padding-right: 1.25rem; }
-  .pb2 { padding-bottom: 2rem; }
-
-  .error-banner { background: #FBE0E0; color: #8C1F1F; border-radius: var(--border-radius-md); padding: 10px 14px; font-size: 13px; margin-bottom: 1rem; display: none; }
-
-  /* GLOBAL SCORE BAR */
-  .global-score-bar { display: flex; gap: 6px; overflow-x: auto; padding: 10px 1.25rem; background: var(--color-background-secondary); border-bottom: 1px solid var(--color-border-tertiary); }
-  .gsb-chip { flex-shrink: 0; background: var(--color-background-primary); border: 1px solid var(--color-border-tertiary); border-radius: 999px; padding: 5px 10px; font-size: 12px; display: flex; gap: 5px; align-items: center; white-space: nowrap; }
-  .gsb-chip.me { border-color: #378ADD; font-weight: 700; }
-  .gsb-rank1 { color: #BA7517; }
-
-  /* BUZZER */
-  .buzzer-wrap { display: flex; align-items: center; justify-content: center; padding: 2rem 0; }
-  .buzzer-btn { width: 180px; height: 180px; border-radius: 50%; background: radial-gradient(circle at 35% 30%, #E8453C, #A32D2D); color: #fff; font-size: 22px; font-weight: 800; border: none; cursor: pointer; box-shadow: 0 8px 0 #6E1717, 0 10px 20px rgba(0,0,0,0.25); transition: all 0.08s; letter-spacing: 1px; }
-  .buzzer-btn:active { transform: translateY(6px); box-shadow: 0 2px 0 #6E1717, 0 4px 10px rgba(0,0,0,0.2); }
-  .buzzer-btn:disabled { background: radial-gradient(circle at 35% 30%, #c9c7c0, #9a9890); box-shadow: 0 8px 0 #6e6c66, 0 10px 20px rgba(0,0,0,0.15); cursor: not-allowed; }
-  .buzzer-winner-banner { text-align: center; background: #FAC775; color: #633806; border-radius: var(--border-radius-lg); padding: 1.25rem; font-size: 18px; font-weight: 700; margin: 1rem 0; }
-
-  /* SETUP / CONFIG */
-  .pill-select { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.75rem; }
-  .pill-option { border: 1px solid var(--color-border-secondary); border-radius: 999px; padding: 7px 14px; font-size: 13px; cursor: pointer; background: var(--color-background-primary); transition: all 0.15s; }
-  .pill-option.selected { background: #185FA5; color: #fff; border-color: #185FA5; }
-  .cat-edit-card { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem; margin-bottom: 0.6rem; }
-  .cat-edit-card input { margin-bottom: 0.5rem; }
-  .q-edit-row { display: flex; gap: 6px; margin-bottom: 6px; align-items: flex-start; }
-  .q-edit-row input { margin-bottom: 0; flex: 1; font-size: 13px; padding: 8px 10px; }
-  .q-edit-label { font-size: 11px; color: var(--color-text-secondary); width: 38px; flex-shrink: 0; padding-top: 9px; }
-
-  /* HISTORY */
-  .history-card { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.85rem 1rem; margin-bottom: 0.6rem; }
-  .history-date { font-size: 11px; color: var(--color-text-secondary); margin-bottom: 4px; }
-  .history-winner { font-size: 14px; font-weight: 700; color: #BA7517; }
-  .history-games { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
-
-  /* CONFETTI */
-  .confetti-piece { position: fixed; top: -20px; width: 8px; height: 14px; opacity: 0.9; z-index: 9999; pointer-events: none; animation: confetti-fall linear forwards; }
-  @keyframes confetti-fall {
-    to { transform: translateY(110vh) rotate(540deg); opacity: 0.3; }
-  }
-
-  /* HERD QUEUE */
-  .queue-item { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); margin-bottom: 6px; font-size: 13px; }
-
-  /* FINAL JEOPARDY */
-  .fj-banner { background: linear-gradient(135deg, #185FA5, #0C447C); color: #fff; border-radius: var(--border-radius-lg); padding: 1.5rem 1.25rem; text-align: center; margin-bottom: 1rem; }
-  .fj-banner-title { font-size: 20px; font-weight: 700; margin-bottom: 0.3rem; }
-  .fj-banner-sub { font-size: 13px; opacity: 0.85; }
-  .fj-wager-card { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.85rem 1rem; margin-bottom: 0.6rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-  .fj-status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--color-border-secondary); flex-shrink: 0; }
-  .fj-status-dot.ready { background: #3B6D11; }
-  .fj-reveal-card { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-bottom: 0.75rem; }
-  .fj-reveal-name { font-size: 13px; font-weight: 700; margin-bottom: 6px; }
-  .fj-reveal-wager { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 8px; }
-  .fj-reveal-answer { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 10px 12px; font-size: 14px; margin-bottom: 8px; }
-  .fj-locked-msg { text-align: center; padding: 2rem 1rem; color: var(--color-text-secondary); }
-
-  /* FILE UPLOAD */
-  .upload-zone { border: 2px dashed var(--color-border-secondary); border-radius: var(--border-radius-lg); padding: 1.5rem 1rem; text-align: center; cursor: pointer; transition: border-color 0.15s, background 0.15s; margin-bottom: 0.75rem; }
-  .upload-zone:hover { border-color: #378ADD; background: var(--color-background-secondary); }
-  .upload-zone-icon { font-size: 28px; margin-bottom: 0.4rem; }
-  .upload-zone-text { font-size: 13px; color: var(--color-text-secondary); }
-  .upload-preview { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 0.75rem; margin-bottom: 0.75rem; max-height: 220px; overflow-y: auto; }
-  .upload-preview-row { font-size: 12px; padding: 5px 0; border-bottom: 1px solid var(--color-border-tertiary); }
-  .upload-preview-row:last-child { border-bottom: none; }
-  .upload-format-hint { font-size: 11px; color: var(--color-text-secondary); background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 10px; margin-bottom: 0.75rem; line-height: 1.5; }
-  .upload-format-hint code { background: var(--color-border-tertiary); padding: 1px 4px; border-radius: 4px; }
-
-  /* HERMANO MAS PROBABLE */
-  .role-card { border: 2px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1.25rem; margin-bottom: 0.75rem; cursor: pointer; transition: all 0.15s; text-align: center; }
-  .role-card:hover { border-color: var(--color-border-primary); }
-  .role-card.selected { border-color: #185FA5; background: #EAF2FB; }
-  .role-icon { font-size: 32px; margin-bottom: 0.5rem; }
-  .role-title { font-size: 15px; font-weight: 700; margin-bottom: 4px; }
-  .role-desc { font-size: 12px; color: var(--color-text-secondary); }
-  .hmp-question-banner { background: linear-gradient(135deg, #5B4FC4, #3C3489); color: #fff; border-radius: var(--border-radius-lg); padding: 1.25rem; text-align: center; margin-bottom: 1rem; font-size: 17px; font-weight: 700; line-height: 1.4; }
-  .hmp-vote-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
-  .hmp-vote-option { border: 1px solid var(--color-border-tertiary); border-radius: var(--border-radius-md); padding: 12px 14px; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.15s; text-align: left; background: var(--color-background-primary); }
-  .hmp-vote-option:hover { background: var(--color-background-secondary); }
-  .hmp-vote-option.selected { border-color: #185FA5; background: #EAF2FB; }
-  .hmp-tally-bar-wrap { margin-bottom: 10px; }
-  .hmp-tally-label { font-size: 13px; font-weight: 600; margin-bottom: 3px; display: flex; justify-content: space-between; }
-  .hmp-tally-bar-bg { height: 10px; background: var(--color-border-tertiary); border-radius: 5px; overflow: hidden; }
-  .hmp-tally-bar-fill { height: 100%; background: #5B4FC4; border-radius: 5px; transition: width 0.4s; }
-  .hmp-tally-bar-fill.winner { background: #BA7517; }
-  .hmp-guess-list { margin-bottom: 1rem; }
-  .hmp-guess-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 10px; background: var(--color-background-secondary); border-radius: var(--border-radius-md); margin-bottom: 6px; font-size: 13px; }
-  .hmp-guess-row.correct { background: #E7F3D6; }
-  .hmp-guess-row.wrong { background: #FBE6E6; }
-  .perfect-banner { background: linear-gradient(135deg, #BA7517, #854F0B); color: #fff; border-radius: var(--border-radius-lg); padding: 1rem; text-align: center; font-weight: 700; margin-bottom: 1rem; }
-</style>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
 <div class="app" id="app">
@@ -266,6 +40,10 @@
       <div class="game-card" style="cursor:default;">
         <div class="game-icon">👨‍👩‍👧‍👦</div>
         <div><div class="game-title">El Hermano Más Probable</div><div class="game-desc">Los hijos votan, los demás adivinan quién ganó</div></div>
+      </div>
+      <div class="game-card" style="cursor:default;">
+        <div class="game-icon">📸</div>
+        <div><div class="game-title">Galería de Recuerdos</div><div class="game-desc">Fotos de papá con preguntas — ¿quién sabe más?</div></div>
       </div>
     </div>
   </div>
@@ -317,6 +95,8 @@
     </div>
     <div class="section-label">JUGADORES (<span id="player-count">0</span>)</div>
     <div class="player-list" id="player-list"></div>
+    <div class="divider"></div>
+    <button class="btn btn-purple" onclick="goToProposePhoto()">📸 Proponer una foto para la Galería</button>
     <div id="host-controls" style="display:none;">
       <div class="divider"></div>
       <div class="section-label">ELEGIR JUEGO</div>
@@ -336,6 +116,10 @@
         <div class="game-icon">👨‍👩‍👧‍👦</div>
         <div><div class="game-title">El Hermano Más Probable</div><div class="game-desc">Los hijos votan, los demás adivinan quién ganó</div></div>
       </div>
+      <div class="game-card" onclick="goToPhotoSetup()">
+        <div class="game-icon">📸</div>
+        <div><div class="game-title">Galería de Recuerdos</div><div class="game-desc">Sube fotos de papá, todos adivinan</div></div>
+      </div>
       <div class="divider"></div>
       <button class="btn" onclick="showHistory()">📊 Ver historial de partidas</button>
     </div>
@@ -343,6 +127,32 @@
       <div class="divider"></div>
       <div class="text-center text-sm p1"><span class="spinner"></span>Esperando que el host inicie el juego...</div>
       <button class="btn" onclick="showHistory()">📊 Ver historial de partidas</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: PROPONER FOTO (cualquier jugador) ===== -->
+<div class="screen" id="screen-propose-photo">
+  <div class="topbar">
+    <span class="topbar-back" onclick="enterLobby()">← Lobby</span>
+    <span class="topbar-title">📸 Proponer una foto</span>
+    <span></span>
+  </div>
+  <div class="px125 pb2">
+    <div class="text-sm mb1">Sube una foto y su ficha. El host la incluirá en la Galería de Recuerdos.</div>
+    <div class="photo-upload-zone" onclick="document.getElementById('propose-photo-file-input').click()">
+      <div class="upload-zone-icon">📸</div>
+      <div class="upload-zone-text">Toca para elegir una foto</div>
+    </div>
+    <input type="file" id="propose-photo-file-input" accept="image/*" style="display:none;" onchange="handleProposePhotoSelected(event)">
+    <div id="propose-photo-preview" style="display:none;">
+      <div class="photo-display-wrap"><img id="propose-photo-img" src="" alt="Vista previa"></div>
+      <div class="photo-fact-card">
+        <div class="photo-fact-row"><label>📍 Lugar</label><input type="text" id="propose-photo-lugar" placeholder="Ej: Playa del Carmen"></div>
+        <div class="photo-fact-row"><label>📅 Año</label><input type="text" id="propose-photo-anio" placeholder="Ej: 2015" inputmode="numeric"></div>
+        <div class="photo-fact-row"><label>🎉 Evento</label><input type="text" id="propose-photo-evento" placeholder="Ej: Cumpleaños de papá"></div>
+      </div>
+      <button class="btn btn-primary" onclick="submitProposedPhoto()">Enviar a la Galería</button>
     </div>
   </div>
 </div>
@@ -415,6 +225,7 @@
       <div class="upload-zone-text">Toca para subir tu archivo</div>
     </div>
     <input type="file" id="jp-file-input" accept=".csv,.xlsx,.xls,.json" style="display:none;" onchange="handleJPFileUpload(event)">
+    <div id="jp-sheet-picker" style="display:none;"></div>
     <div id="jp-file-preview" class="upload-preview" style="display:none;"></div>
     <button class="btn btn-primary" id="jp-file-use-btn" style="display:none;" onclick="useUploadedJPBoard()">Usar este tablero</button>
   </div>
@@ -439,7 +250,7 @@
   <div class="topbar">
     <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
     <span class="topbar-title" id="jeopardy-host-title">Jeopardy — Tablero</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('jeopardy')">?</button>
   </div>
   <div id="global-score-bar-jh" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
@@ -495,7 +306,7 @@
 
 <!-- ===== PANTALLA: JEOPARDY GUEST ===== -->
 <div class="screen" id="screen-jeopardy-guest">
-  <div class="topbar"><span></span><span class="topbar-title">📺 Jeopardy</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">📺 Jeopardy</span><button class="help-btn" onclick="openHelpModal('jeopardy')">?</button></div>
   <div id="global-score-bar-jg" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2 text-center">
     <div id="jg-idle-area">
@@ -550,7 +361,7 @@
   <div class="topbar">
     <span></span>
     <span class="topbar-title">🏆 Final Jeopardy — Apuestas</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('jeopardy')">?</button>
   </div>
   <div class="px125 pb2">
     <div class="fj-banner">
@@ -568,7 +379,7 @@
   <div class="topbar">
     <span></span>
     <span class="topbar-title">🏆 Final Jeopardy</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('jeopardy')">?</button>
   </div>
   <div class="px125 pb2">
     <div class="fj-banner">
@@ -586,7 +397,7 @@
   <div class="topbar">
     <span></span>
     <span class="topbar-title">🏆 Revelando resultados</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('jeopardy')">?</button>
   </div>
   <div class="px125 pb2">
     <div class="modal-answer mb1" id="fj-correct-answer-box" style="display:block;"></div>
@@ -597,7 +408,7 @@
 
 <!-- ===== PANTALLA: FINAL JEOPARDY GUEST ===== -->
 <div class="screen" id="screen-fj-guest">
-  <div class="topbar"><span></span><span class="topbar-title">🏆 Final Jeopardy</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">🏆 Final Jeopardy</span><button class="help-btn" onclick="openHelpModal('jeopardy')">?</button></div>
   <div id="global-score-bar-fjg" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
 
@@ -642,80 +453,123 @@
   <div class="topbar">
     <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
     <span class="topbar-title">🐟 Sound Fishy</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('soundfishy')">?</button>
   </div>
   <div id="global-score-bar-sf" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
-    <div class="tabs">
-      <div class="tab active" onclick="sfTab('ai')">IA genera</div>
-      <div class="tab" onclick="sfTab('manual')">Manual</div>
-      <div class="tab" onclick="sfTab('file')">📁 Archivo</div>
-    </div>
-    <div id="sf-ai-tab">
-      <div class="text-sm mb1">La IA generará afirmaciones sobre papá y la familia. ¡Algunas serán falsas!</div>
-      <input type="text" id="sf-dad-hint" placeholder="Nombre de papá o algo sobre él (opcional)">
-      <button class="btn btn-primary" onclick="generateSFStatement()" id="sf-gen-btn">Generar afirmación</button>
-    </div>
-    <div id="sf-manual-tab" style="display:none;">
-      <div class="section-label">ESCRIBE UNA AFIRMACIÓN</div>
-      <input type="text" id="sf-manual-text" placeholder="Ej: Papá habla 3 idiomas" maxlength="120">
-      <select id="sf-manual-type">
-        <option value="true">Es VERDAD</option>
-        <option value="false">Es MENTIRA</option>
-      </select>
-      <button class="btn btn-primary" onclick="sendManualSF()">Enviar a todos</button>
-    </div>
-    <div id="sf-file-tab" style="display:none;">
-      <div class="upload-format-hint">Columnas requeridas: <code>afirmacion</code>, <code>es_verdad</code> (VERDADERO/FALSO o TRUE/FALSE)<br>Acepta <code>.csv</code>, <code>.xlsx</code> o <code>.json</code></div>
-      <div class="upload-zone" onclick="document.getElementById('sf-file-input').click()">
-        <div class="upload-zone-icon">📁</div>
-        <div class="upload-zone-text">Toca para subir tu archivo</div>
+
+    <!-- Question source picker (shown before a round starts) -->
+    <div id="sf-source-section">
+      <div class="tabs">
+        <div class="tab active" onclick="sfTab('ai')">IA genera</div>
+        <div class="tab" onclick="sfTab('manual')">Manual</div>
+        <div class="tab" onclick="sfTab('file')">📁 Archivo</div>
       </div>
-      <input type="file" id="sf-file-input" accept=".csv,.xlsx,.xls,.json" style="display:none;" onchange="handleSFFileUpload(event)">
-      <div id="sf-file-preview" class="upload-preview" style="display:none;"></div>
-      <button class="btn btn-primary" id="sf-file-use-btn" style="display:none;" onclick="useUploadedSFQueue()">Usar estas afirmaciones</button>
+      <div id="sf-ai-tab">
+        <div class="text-sm mb1">La IA generará una pregunta con respuesta real (ej: "¿Cuál fue el primer trabajo de papá?"). El adivinador rota cada ronda.</div>
+        <input type="text" id="sf-dad-hint" placeholder="Tema o pista (opcional)">
+        <button class="btn btn-primary" onclick="generateSFStatement()" id="sf-gen-btn">Generar pregunta</button>
+      </div>
+      <div id="sf-manual-tab" style="display:none;">
+        <div class="section-label">PREGUNTA</div>
+        <input type="text" id="sf-manual-text" placeholder="Ej: ¿En qué ciudad nació papá?" maxlength="140">
+        <div class="section-label">RESPUESTA REAL</div>
+        <input type="text" id="sf-manual-answer" placeholder="Ej: Guadalajara" maxlength="80">
+        <button class="btn btn-primary" onclick="sendManualSF()">Empezar ronda</button>
+      </div>
+      <div id="sf-file-tab" style="display:none;">
+        <div class="upload-format-hint">Columnas requeridas: <code>afirmacion</code>, <code>respuesta</code> (la pregunta y su respuesta real)<br>Acepta <code>.csv</code>, <code>.xlsx</code> o <code>.json</code></div>
+        <div class="upload-zone" onclick="document.getElementById('sf-file-input').click()">
+          <div class="upload-zone-icon">📁</div>
+          <div class="upload-zone-text">Toca para subir tu archivo</div>
+        </div>
+        <input type="file" id="sf-file-input" accept=".csv,.xlsx,.xls,.json" style="display:none;" onchange="handleSFFileUpload(event)">
+        <div id="sf-sheet-picker" style="display:none;"></div>
+        <div id="sf-file-preview" class="upload-preview" style="display:none;"></div>
+        <button class="btn btn-primary" id="sf-file-use-btn" style="display:none;" onclick="useUploadedSFQueue()">Usar estas preguntas</button>
+      </div>
     </div>
-    <div id="sf-current-statement" style="display:none;">
+
+    <!-- Phase: writing (host monitors who's submitted, and submits own answer if not the guesser) -->
+    <div id="sf-writing-section" style="display:none;">
       <div class="divider"></div>
-      <div class="sf-statement" id="sf-stmt-text"></div>
-      <div id="sf-votes-area">
-        <div class="section-label">VOTOS RECIBIDOS (<span id="sf-vote-count">0</span>/<span id="sf-total-players">0</span>)</div>
-        <div class="progress-bar"><div class="progress-fill" id="sf-vote-progress" style="width:0%"></div></div>
-        <button class="btn btn-primary" onclick="revealSFResult()" id="sf-reveal-btn">Revelar resultado</button>
+      <div class="sf-statement" id="sf-host-question-text"></div>
+      <div class="text-sm text-center mb1">🎯 Adivinador de esta ronda: <b id="sf-host-guesser-name"></b></div>
+
+      <div id="sf-host-own-answer-area" style="display:none;">
+        <div class="section-label">TU RESPUESTA (también participas)</div>
+        <input type="text" id="sf-host-answer-input" placeholder="Escribe tu respuesta (mentira creíble, o la verdad si te tocó)" maxlength="100">
+        <button class="btn btn-primary" onclick="submitHostSFAnswer()">Enviar mi respuesta</button>
       </div>
-      <div id="sf-result-area" style="display:none;">
-        <div id="sf-answer-reveal" style="text-align:center;font-size:18px;font-weight:700;padding:1rem 0;"></div>
-        <div id="sf-vote-results"></div>
-        <button class="btn btn-success mt1" onclick="nextSFRound()">Siguiente ronda</button>
-      </div>
+      <div id="sf-host-own-answered" style="display:none;" class="text-sm text-center mb1">✅ Tu respuesta fue enviada</div>
+
+      <div class="section-label">RESPUESTAS RECIBIDAS (<span id="sf-write-count">0</span>/<span id="sf-write-total">0</span>)</div>
+      <div class="progress-bar"><div class="progress-fill" id="sf-write-progress" style="width:0%"></div></div>
+      <button class="btn btn-primary" onclick="startSFGuessing()" id="sf-start-guessing-btn">Todos listos — Empezar adivinanza</button>
     </div>
+
+    <!-- Phase: guessing (host watches the guesser play, on guesser's own device) -->
+    <div id="sf-guessing-host-section" style="display:none;">
+      <div class="divider"></div>
+      <div class="sf-statement" id="sf-host-guessing-question"></div>
+      <div id="sf-host-is-guesser-area" style="display:none;">
+        <div class="text-sm text-center mb1">🎯 ¡Te toca adivinar! Elige a alguien para revelar su respuesta.</div>
+        <div id="sf-host-guesser-options"></div>
+      </div>
+      <div id="sf-host-watching-area" style="display:none;">
+        <div class="text-sm text-center mb1">🎯 <b id="sf-host-guessing-name"></b> está adivinando en su celular...</div>
+      </div>
+      <div id="sf-host-reveal-log"></div>
+    </div>
+
+    <!-- Phase: result -->
+    <div id="sf-result-section" style="display:none;">
+      <div class="divider"></div>
+      <div id="sf-result-summary"></div>
+      <button class="btn btn-success mt1" onclick="nextSFRound()">Siguiente ronda</button>
+    </div>
+
     <div class="divider"></div>
     <button class="btn btn-success" onclick="finishGenericRound('soundfishy')">🏁 Terminar Sound Fishy</button>
   </div>
 </div>
 
-<!-- ===== PANTALLA: SOUND FISHY GUEST ===== -->
+<!-- ===== PANTALLA: SOUND FISHY GUEST (no es el adivinador) ===== -->
 <div class="screen" id="screen-sf-guest">
-  <div class="topbar"><span></span><span class="topbar-title">🐟 Sound Fishy</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">🐟 Sound Fishy</span><button class="help-btn" onclick="openHelpModal('soundfishy')">?</button></div>
   <div id="global-score-bar-sfg" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
-    <div id="sf-guest-wait" class="text-center text-sm p1"><span class="spinner"></span>Esperando la siguiente afirmación...</div>
-    <div id="sf-guest-vote" style="display:none;">
-      <div class="sf-statement" id="sf-guest-stmt"></div>
-      <div class="vote-btns">
-        <button class="vote-btn vote-real" onclick="castVote('true')">✅ Es verdad</button>
-        <button class="vote-btn vote-fish" onclick="castVote('false')">🐟 ¡Suena falso!</button>
+
+    <div id="sf-guest-writing" style="display:none;">
+      <div class="sf-statement" id="sf-guest-question-writing"></div>
+      <div class="text-sm text-center mb1">🎯 Adivinador de esta ronda: <b id="sf-guest-guesser-name"></b></div>
+      <div class="photo-correct-answers-banner" id="sf-guest-real-answer">Respuesta real: —</div>
+      <div id="sf-guest-write-form">
+        <input type="text" id="sf-guest-answer-input" placeholder="Escribe tu respuesta (mentira creíble, o la verdad si te tocó)" maxlength="100">
+        <button class="btn btn-primary" onclick="submitGuestSFAnswer()">Enviar mi respuesta</button>
+      </div>
+      <div id="sf-guest-write-sent" style="display:none;" class="text-center text-sm p1">
+        <div style="font-size:40px;margin-bottom:0.5rem;">⏳</div>
+        Respuesta enviada. Esperando a los demás...
       </div>
     </div>
-    <div id="sf-guest-voted" style="display:none;" class="text-center text-sm p1">
-      <div style="font-size:40px;margin-bottom:0.5rem;">⏳</div>
-      Voto enviado. Esperando resultado...
+
+    <div id="sf-guest-guesser-turn" style="display:none;">
+      <div class="sf-statement" id="sf-guest-question-guessing"></div>
+      <div class="text-sm text-center mb1">🎯 ¡Te toca adivinar! Elige a alguien para revelar su respuesta.</div>
+      <div id="sf-guesser-options"></div>
     </div>
+
+    <div id="sf-guest-watching" style="display:none;" class="text-center text-sm p1">
+      <div style="font-size:40px;margin-bottom:0.5rem;">👀</div>
+      <b id="sf-guest-watching-name"></b> está adivinando...
+      <div id="sf-guest-watching-log" class="mt1"></div>
+    </div>
+
     <div id="sf-guest-result" style="display:none;">
-      <div id="sf-guest-answer-reveal" style="text-align:center;font-size:18px;font-weight:700;padding:1rem 0;"></div>
-      <div id="sf-guest-vote-results"></div>
-      <div class="text-center text-sm mt1"><span class="spinner"></span>Esperando siguiente ronda...</div>
+      <div id="sf-guest-result-summary"></div>
     </div>
+
     <div class="divider"></div>
     <div class="section-label">MARCADOR</div>
     <table class="scores-table" id="sf-guest-scores"></table>
@@ -727,7 +581,7 @@
   <div class="topbar">
     <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
     <span class="topbar-title">🐄 Herd Mentality</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('herd')">?</button>
   </div>
   <div id="global-score-bar-hh" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
@@ -755,12 +609,19 @@
         <div class="upload-zone-text">Toca para subir tu archivo</div>
       </div>
       <input type="file" id="herd-file-input" accept=".csv,.xlsx,.xls,.json" style="display:none;" onchange="handleHerdFileUpload(event)">
+      <div id="herd-sheet-picker" style="display:none;"></div>
       <div id="herd-file-preview" class="upload-preview" style="display:none;"></div>
       <button class="btn btn-primary" id="herd-file-use-btn" style="display:none;" onclick="useUploadedHerdQueue()">Usar estas preguntas</button>
     </div>
     <div id="herd-current" style="display:none;">
       <div class="divider"></div>
       <div class="herd-q" id="herd-q-text"></div>
+      <div id="herd-host-answer-form">
+        <div class="section-label">TU RESPUESTA (también participas)</div>
+        <input type="text" id="herd-host-answer-input" placeholder="Tu respuesta..." maxlength="60">
+        <button class="btn btn-primary" onclick="submitHostHerdAnswer()">Enviar mi respuesta</button>
+      </div>
+      <div id="herd-host-answered" style="display:none;" class="text-sm text-center mb1">✅ Tu respuesta fue enviada</div>
       <div class="section-label">RESPUESTAS (<span id="herd-ans-count">0</span>/<span id="herd-ans-total">0</span>)</div>
       <div class="progress-bar"><div class="progress-fill" id="herd-progress" style="width:0%"></div></div>
       <button class="btn btn-primary" onclick="revealHerd()" id="herd-reveal-btn">Revelar respuestas</button>
@@ -779,7 +640,7 @@
 
 <!-- ===== PANTALLA: HERD GUEST ===== -->
 <div class="screen" id="screen-herd-guest">
-  <div class="topbar"><span></span><span class="topbar-title">🐄 Herd Mentality</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">🐄 Herd Mentality</span><button class="help-btn" onclick="openHelpModal('herd')">?</button></div>
   <div id="global-score-bar-hg" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
     <button class="btn btn-purple" onclick="openProposeModal()">💡 Proponer una pregunta</button>
@@ -819,7 +680,7 @@
   <div class="topbar">
     <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
     <span class="topbar-title">👨‍👩‍👧‍👦 El Hermano Más Probable</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('hmp')">?</button>
   </div>
   <div class="px125 pb2">
     <div class="text-sm mb1">Antes de empezar, cada jugador elige su rol para toda la partida:</div>
@@ -872,6 +733,7 @@
         <div class="upload-zone-text">Toca para subir tu archivo</div>
       </div>
       <input type="file" id="hmp-file-input" accept=".csv,.xlsx,.xls,.json" style="display:none;" onchange="handleHMPFileUpload(event)">
+      <div id="hmp-sheet-picker" style="display:none;"></div>
       <div id="hmp-file-preview" class="upload-preview" style="display:none;"></div>
       <button class="btn btn-primary" id="hmp-file-use-btn" style="display:none;" onclick="useUploadedHMPQueue()">Usar estas preguntas</button>
     </div>
@@ -883,11 +745,16 @@
   <div class="topbar">
     <span></span>
     <span class="topbar-title">👨‍👩‍👧‍👦 Hermano Más Probable</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('hmp')">?</button>
   </div>
   <div id="global-score-bar-hmph" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
     <div class="hmp-question-banner" id="hmp-host-question"></div>
+    <div id="hmp-host-own-vote-area" style="display:none;">
+      <div class="text-sm mb1 text-center">🙋 Tú también eres hijo/a — ¡emite tu voto!</div>
+      <div class="hmp-vote-options" id="hmp-host-own-vote-options"></div>
+      <div class="divider"></div>
+    </div>
     <div class="section-label">HIJOS VOTANDO (<span id="hmp-votes-count">0</span>/<span id="hmp-votes-total">0</span>)</div>
     <div id="hmp-host-voting-list"></div>
     <button class="btn btn-primary mt1" onclick="revealHMPVotes()" id="hmp-reveal-votes-btn">Todos votaron — Revelar</button>
@@ -899,11 +766,16 @@
   <div class="topbar">
     <span></span>
     <span class="topbar-title">👨‍👩‍👧‍👦 Hermano Más Probable</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('hmp')">?</button>
   </div>
   <div id="global-score-bar-hmphg" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
     <div class="hmp-question-banner" id="hmp-host-guess-question"></div>
+    <div id="hmp-host-own-guess-area" style="display:none;">
+      <div class="text-sm mb1 text-center">🤔 Tú también adivinas — ¿quién creen que ganó?</div>
+      <div class="hmp-vote-options" id="hmp-host-own-guess-options"></div>
+      <div class="divider"></div>
+    </div>
     <div class="text-sm mb1 text-center">Los hijos ya votaron en secreto. Ahora los demás intentan adivinar quién ganó esa votación.</div>
     <div class="section-label">ADIVINANZAS RECIBIDAS (<span id="hmp-guess-count">0</span>/<span id="hmp-guess-total">0</span>)</div>
     <div class="progress-bar"><div class="progress-fill" id="hmp-guess-progress" style="width:0%"></div></div>
@@ -916,7 +788,7 @@
   <div class="topbar">
     <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
     <span class="topbar-title">👨‍👩‍👧‍👦 Resultado</span>
-    <span></span>
+    <button class="help-btn" onclick="openHelpModal('hmp')">?</button>
   </div>
   <div id="global-score-bar-hmphr" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
@@ -937,7 +809,7 @@
 
 <!-- ===== PANTALLA: HMP GUEST — ES HIJO, VOTANDO ===== -->
 <div class="screen" id="screen-hmp-guest-voting">
-  <div class="topbar"><span></span><span class="topbar-title">🙋 Tu voto secreto</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">🙋 Tu voto secreto</span><button class="help-btn" onclick="openHelpModal('hmp')">?</button></div>
   <div id="global-score-bar-hmpgv" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
     <div class="hmp-question-banner" id="hmp-guest-vote-question"></div>
@@ -948,7 +820,7 @@
 
 <!-- ===== PANTALLA: HMP GUEST — ES HIJO, ESPERANDO ===== -->
 <div class="screen" id="screen-hmp-guest-voted">
-  <div class="topbar"><span></span><span class="topbar-title">🙋 Voto enviado</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">🙋 Voto enviado</span><button class="help-btn" onclick="openHelpModal('hmp')">?</button></div>
   <div id="global-score-bar-hmpgvd" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2 text-center">
     <div style="font-size:40px;margin:1rem 0;">🤫</div>
@@ -958,7 +830,7 @@
 
 <!-- ===== PANTALLA: HMP GUEST — ADIVINA ===== -->
 <div class="screen" id="screen-hmp-guest-guessing">
-  <div class="topbar"><span></span><span class="topbar-title">🤔 ¿Quién creen que ganó?</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">🤔 ¿Quién creen que ganó?</span><button class="help-btn" onclick="openHelpModal('hmp')">?</button></div>
   <div id="global-score-bar-hmpgg" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
     <div class="hmp-question-banner" id="hmp-guest-guess-question"></div>
@@ -969,7 +841,7 @@
 
 <!-- ===== PANTALLA: HMP GUEST — ESPERANDO RESULTADO ===== -->
 <div class="screen" id="screen-hmp-guest-waiting-result">
-  <div class="topbar"><span></span><span class="topbar-title">👨‍👩‍👧‍👦 Hermano Más Probable</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">👨‍👩‍👧‍👦 Hermano Más Probable</span><button class="help-btn" onclick="openHelpModal('hmp')">?</button></div>
   <div id="global-score-bar-hmpgwr" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2 text-center">
     <div style="font-size:40px;margin:1rem 0;">⏳</div>
@@ -979,7 +851,7 @@
 
 <!-- ===== PANTALLA: HMP GUEST — RESULTADO ===== -->
 <div class="screen" id="screen-hmp-guest-result">
-  <div class="topbar"><span></span><span class="topbar-title">👨‍👩‍👧‍👦 Resultado</span><span></span></div>
+  <div class="topbar"><span></span><span class="topbar-title">👨‍👩‍👧‍👦 Resultado</span><button class="help-btn" onclick="openHelpModal('hmp')">?</button></div>
   <div id="global-score-bar-hmpgr" class="global-score-bar" style="display:none;"></div>
   <div class="px125 pb2">
     <div id="hmp-guest-perfect-banner" class="perfect-banner" style="display:none;">🎯 ¡Acierto perfecto!</div>
@@ -996,1903 +868,119 @@
   </div>
 </div>
 
+<!-- ===== PANTALLA: GALERÍA SETUP (HOST) — SUBIR FOTOS ===== -->
+<div class="screen" id="screen-photo-setup">
+  <div class="topbar">
+    <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
+    <span class="topbar-title">📸 Galería de Recuerdos</span>
+    <span></span>
+  </div>
+  <div class="px125 pb2">
+    <div id="photo-queue-section">
+      <div class="section-label">FOTOS PROPUESTAS POR LA FAMILIA (<span id="photo-queue-count">0</span>)</div>
+      <div id="photo-queue-list"></div>
+      <div class="divider"></div>
+    </div>
+
+    <div class="section-label">1. (OPCIONAL) SUBE LA FICHA DE DATOS</div>
+    <div class="upload-format-hint">Columnas: <code>nombre_archivo</code>, <code>lugar</code>, <code>anio</code>, <code>evento</code><br>El <code>nombre_archivo</code> debe coincidir exacto con el nombre de la foto (ej: <code>playa2015.jpg</code>). Acepta <code>.csv</code>, <code>.xlsx</code> o <code>.json</code></div>
+    <div class="upload-zone" onclick="document.getElementById('photo-facts-file-input').click()">
+      <div class="upload-zone-icon">📋</div>
+      <div class="upload-zone-text">Toca para subir el archivo de fichas</div>
+    </div>
+    <input type="file" id="photo-facts-file-input" accept=".csv,.xlsx,.xls,.json" style="display:none;" onchange="handlePhotoFactsFileUpload(event)">
+    <div id="photo-facts-sheet-picker" style="display:none;"></div>
+    <div id="photo-facts-status" class="text-sm" style="display:none;"></div>
+
+    <div class="divider"></div>
+    <div class="section-label">2. SUBE LAS FOTOS (hasta 20)</div>
+    <div class="text-sm mb1">Si subiste una ficha, las fotos se completan automáticamente al subirlas por su nombre de archivo. Las que no coincidan, las llenas a mano.</div>
+    <div class="photo-upload-zone" onclick="document.getElementById('photo-file-input').click()">
+      <div class="upload-zone-icon">📸</div>
+      <div class="upload-zone-text">Toca para elegir fotos de tu celular</div>
+    </div>
+    <input type="file" id="photo-file-input" accept="image/*" multiple style="display:none;" onchange="handlePhotoFilesSelected(event)">
+    <div id="photo-compress-status" class="text-sm text-center" style="display:none;"><span class="spinner"></span>Comprimiendo fotos...</div>
+    <div class="photo-counter-badge" id="photo-counter-badge" style="display:none;"></div>
+    <div class="photo-thumb-grid" id="photo-thumb-grid"></div>
+    <div id="photo-question-forms"></div>
+    <button class="btn btn-primary mt1" id="photo-start-btn" style="display:none;" onclick="startPhotoGallery()">🏁 Empezar Galería de Recuerdos</button>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: GALERÍA HOST — MOSTRANDO FOTO ===== -->
+<div class="screen" id="screen-photo-host">
+  <div class="topbar">
+    <span></span>
+    <span class="topbar-title">📸 Galería de Recuerdos</span>
+    <button class="help-btn" onclick="openHelpModal('photos')">?</button>
+  </div>
+  <div id="global-score-bar-phh" class="global-score-bar" style="display:none;"></div>
+  <div class="px125 pb2">
+    <div class="photo-counter-badge" id="photo-host-counter"></div>
+    <div class="photo-display-wrap"><img id="photo-host-img" src="" alt="Foto de papá"></div>
+    <div class="photo-correct-answers-banner" id="photo-host-correct-answers"></div>
+    <div class="section-label">RESPUESTAS RECIBIDAS (<span id="photo-answer-count">0</span>/<span id="photo-answer-total">0</span>)</div>
+    <div id="photo-host-answers-list"></div>
+    <button class="btn btn-success mt1" onclick="nextPhotoRound()" id="photo-next-btn">Siguiente foto</button>
+    <button class="btn btn-purple" onclick="finishGenericRound('photos')">🏁 Terminar Galería</button>
+    <div class="divider"></div>
+    <div class="section-label">MARCADOR</div>
+    <table class="scores-table" id="photo-host-scores"></table>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: GALERÍA GUEST — RESPONDIENDO ===== -->
+<div class="screen" id="screen-photo-guest">
+  <div class="topbar"><span></span><span class="topbar-title">📸 Galería de Recuerdos</span><button class="help-btn" onclick="openHelpModal('photos')">?</button></div>
+  <div id="global-score-bar-phg" class="global-score-bar" style="display:none;"></div>
+  <div class="px125 pb2">
+    <div class="photo-counter-badge" id="photo-guest-counter"></div>
+    <div class="photo-display-wrap"><img id="photo-guest-img" src="" alt="Foto de papá"></div>
+    <div id="photo-guest-answer-form">
+      <div class="photo-guess-grid">
+        <div class="photo-guess-field"><label>📍 Lugar</label><input type="text" id="photo-guess-lugar" placeholder="¿Dónde?"></div>
+        <div class="photo-guess-field"><label>📅 Año</label><input type="text" id="photo-guess-anio" placeholder="¿Cuándo?" inputmode="numeric"></div>
+        <div class="photo-guess-field"><label>🎉 Evento</label><input type="text" id="photo-guess-evento" placeholder="¿Qué pasaba?"></div>
+      </div>
+      <button class="btn btn-primary" onclick="submitPhotoAnswer()">Enviar respuesta</button>
+    </div>
+    <div id="photo-guest-answered" style="display:none;" class="text-center text-sm p1">
+      <div style="font-size:40px;margin-bottom:0.5rem;">⏳</div>
+      ¡Respuesta enviada! Esperando a los demás...
+    </div>
+    <div class="divider"></div>
+    <div class="section-label">MARCADOR</div>
+    <table class="scores-table" id="photo-guest-scores"></table>
+  </div>
+</div>
+
+<!-- ===== MODAL GENÉRICO: CÓMO SE JUEGA ===== -->
+<div class="help-modal-overlay" id="help-modal-overlay" onclick="if(event.target===this) closeHelpModal()">
+  <div class="help-modal-sheet">
+    <div class="help-modal-header">
+      <div class="help-modal-title" id="help-modal-title">¿Cómo se juega?</div>
+      <button class="help-modal-close" onclick="closeHelpModal()">✕</button>
+    </div>
+    <div id="help-modal-body"></div>
+  </div>
+</div>
+
 </div>
 
 <!-- ===== FIREBASE ===== -->
-<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import {
-  getDatabase, ref, set, get, update, onValue, off, child, remove
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB7q8KvXjmEEarKXy-m4YyTPl85clzTNy8",
-  authDomain: "dia-del-padre-2026.firebaseapp.com",
-  databaseURL: "https://dia-del-padre-2026-default-rtdb.firebaseio.com",
-  projectId: "dia-del-padre-2026",
-  storageBucket: "dia-del-padre-2026.firebasestorage.app",
-  messagingSenderId: "274672737843",
-  appId: "1:274672737843:web:bcd0104fde9a06a2bb8d46"
-};
-
-const fbApp = initializeApp(firebaseConfig);
-const db = getDatabase(fbApp);
-
-window.__fb = { ref, set, get, update, onValue, off, child, remove, db };
-window.dispatchEvent(new Event('firebase-ready'));
-</script>
-
-<script>
-// ============================================================
-// ESTADO GLOBAL
-// ============================================================
-const COLORS = ['av-blue','av-coral','av-teal','av-amber','av-purple','av-pink','av-green','av-gray'];
-let state = { role: null, playerName: '', roomCode: '', isHost: false };
-let roomListenerRef = null;
-let fbReady = false;
-let lastSeenBuzzerWinner = null;
-let myBuzzPressed = false;
-
-window.addEventListener('firebase-ready', () => { fbReady = true; });
-
-// ---- Perfil persistente (nombre recordado en este dispositivo) ----
-function getSavedName() { return localStorage.getItem('fdr_player_name') || ''; }
-function saveName(name) { localStorage.setItem('fdr_player_name', name); }
-
-document.addEventListener('DOMContentLoaded', () => {
-  const saved = getSavedName();
-  if (saved) {
-    document.getElementById('host-name').value = saved;
-    document.getElementById('join-name').value = saved;
-  }
-});
-
-// ---- Sonidos (Web Audio API, sin archivos externos) ----
-let audioCtx = null;
-function getAudioCtx() {
-  if (!audioCtx) { audioCtx = new (window.AudioContext || window.webkitAudioContext)(); }
-  return audioCtx;
-}
-function playTone(freq, duration, type='sine', volume=0.15, delay=0) {
-  try {
-    const ctx = getAudioCtx();
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.type = type; osc.frequency.value = freq;
-    gain.gain.value = volume;
-    osc.connect(gain); gain.connect(ctx.destination);
-    const startTime = ctx.currentTime + delay;
-    osc.start(startTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, startTime + duration);
-    osc.stop(startTime + duration);
-  } catch(e) { /* audio not available, ignore */ }
-}
-function soundBuzzer() { playTone(880, 0.15, 'square', 0.12); }
-function soundCorrect() { playTone(523, 0.1, 'sine', 0.12, 0); playTone(659, 0.1, 'sine', 0.12, 0.1); playTone(784, 0.18, 'sine', 0.12, 0.2); }
-function soundWrong() { playTone(180, 0.3, 'sawtooth', 0.1); }
-function soundClick() { playTone(440, 0.06, 'sine', 0.06); }
-function soundWin() {
-  [523,659,784,1046].forEach((f,i) => playTone(f, 0.22, 'sine', 0.13, i*0.15));
-}
-
-// ---- Confeti ----
-function launchConfetti() {
-  const colors = ['#185FA5','#BA7517','#3B6D11','#A32D2D','#5B4FC4','#FAC775'];
-  for (let i = 0; i < 60; i++) {
-    const piece = document.createElement('div');
-    piece.className = 'confetti-piece';
-    piece.style.left = Math.random()*100 + 'vw';
-    piece.style.background = colors[Math.floor(Math.random()*colors.length)];
-    piece.style.animationDuration = (2 + Math.random()*1.5) + 's';
-    piece.style.opacity = 0.7 + Math.random()*0.3;
-    document.body.appendChild(piece);
-    setTimeout(() => piece.remove(), 4000);
-  }
-}
-
-function roomRef(code) {
-  const { ref, db } = window.__fb;
-  return ref(db, 'rooms/' + code);
-}
-
-async function getRoomData(code) {
-  const { get } = window.__fb;
-  try {
-    const snap = await get(roomRef(code));
-    return snap.exists() ? snap.val() : null;
-  } catch (e) {
-    console.error('Error reading room:', e);
-    showConnectionError();
-    return null;
-  }
-}
-
-async function setRoomData(code, data) {
-  const { set } = window.__fb;
-  try { await set(roomRef(code), data); } catch (e) { console.error('Error writing room:', e); showConnectionError(); }
-}
-
-async function updateRoomData(code, partialData) {
-  const { update } = window.__fb;
-  try { await update(roomRef(code), partialData); } catch (e) { console.error('Error updating room:', e); showConnectionError(); }
-}
-
-function showConnectionError() {
-  const el = document.getElementById('connection-error');
-  if (el) { el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 4000); }
-}
-
-function generateCode() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-  return Array.from({length:5}, () => chars[Math.floor(Math.random()*chars.length)]).join('');
-}
-
-// ============================================================
-// NAVEGACIÓN
-// ============================================================
-function showScreen(id) {
-  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
-}
-
-function goToCreateRoom() { showScreen('screen-create'); }
-
-async function createRoom() {
-  const name = document.getElementById('host-name').value.trim();
-  if (!name) { alert('Ingresa tu nombre'); return; }
-  saveName(name);
-  const btn = document.getElementById('create-room-btn');
-  btn.disabled = true; btn.textContent = 'Creando...';
-
-  state.playerName = name;
-  state.roomCode = generateCode();
-  state.isHost = true;
-  state.role = 'host';
-
-  const room = {
-    code: state.roomCode,
-    host: name,
-    players: [{ name, color: COLORS[0], id: name }],
-    game: null,
-    gameState: {},
-    totalScores: { [name]: 0 },
-    history: [],
-    herdQueue: {}
-  };
-  await setRoomData(state.roomCode, room);
-
-  btn.disabled = false; btn.textContent = 'Crear sala';
-  enterLobby();
-}
-
-async function joinRoom() {
-  const name = document.getElementById('join-name').value.trim();
-  const code = document.getElementById('join-code').value.trim().toUpperCase();
-  if (!name) { alert('Ingresa tu nombre'); return; }
-  if (code.length < 4) { alert('Ingresa el código de sala'); return; }
-  saveName(name);
-
-  const btn = document.getElementById('join-room-btn');
-  btn.disabled = true; btn.textContent = 'Conectando...';
-
-  const room = await getRoomData(code);
-  if (!room) {
-    alert('Sala no encontrada. Verifica el código.');
-    btn.disabled = false; btn.textContent = 'Entrar a la sala';
-    return;
-  }
-
-  const existing = room.players.find(p => p.id === name);
-  if (!existing) {
-    const colorIdx = room.players.length % COLORS.length;
-    room.players.push({ name, color: COLORS[colorIdx], id: name });
-    if (!room.totalScores) room.totalScores = {};
-    room.totalScores[name] = room.totalScores[name] || 0;
-    await setRoomData(code, room);
-  }
-
-  state.playerName = name;
-  state.roomCode = code;
-  state.isHost = false;
-  state.role = 'guest';
-
-  btn.disabled = false; btn.textContent = 'Entrar a la sala';
-  enterLobby();
-}
-
-function enterLobby() {
-  showScreen('screen-lobby');
-  document.getElementById('lobby-code').textContent = state.roomCode;
-  if (state.isHost) {
-    document.getElementById('lobby-host-tag').style.display = 'inline';
-    document.getElementById('host-controls').style.display = 'block';
-    document.getElementById('guest-wait').style.display = 'none';
-  } else {
-    document.getElementById('lobby-host-tag').style.display = 'none';
-    document.getElementById('host-controls').style.display = 'none';
-    document.getElementById('guest-wait').style.display = 'block';
-  }
-  startListening();
-}
-
-async function leaveRoom() {
-  stopListening();
-  if (state.isHost) {
-    const { remove } = window.__fb;
-    try { await remove(roomRef(state.roomCode)); } catch(e) { console.error(e); }
-  } else {
-    const room = await getRoomData(state.roomCode);
-    if (room) {
-      room.players = room.players.filter(p => p.id !== state.playerName);
-      await setRoomData(state.roomCode, room);
-    }
-  }
-  showScreen('screen-home');
-}
-
-async function backToLobby() {
-  stopListening();
-  await updateRoomData(state.roomCode, { game: null, gameState: {} });
-  enterLobby();
-}
-
-function backToLobbyFromHistory() {
-  enterLobby();
-}
-
-// ============================================================
-// LISTENER EN TIEMPO REAL
-// ============================================================
-function startListening() {
-  stopListening();
-  const { onValue } = window.__fb;
-  roomListenerRef = roomRef(state.roomCode);
-  onValue(roomListenerRef, (snapshot) => {
-    const room = snapshot.val();
-    if (!room) return;
-    updateLobbyUI(room);
-    renderGlobalScoreBars(room);
-    if (room.game && !state.isHost) { handleGameChange(room); }
-    if (room.game) { updateGameUI(room); }
-  }, (error) => { console.error('Listener error:', error); showConnectionError(); });
-}
-
-function stopListening() {
-  if (roomListenerRef) { const { off } = window.__fb; off(roomListenerRef); roomListenerRef = null; }
-}
-
-function updateLobbyUI(room) {
-  document.getElementById('player-count').textContent = room.players.length;
-  const list = document.getElementById('player-list');
-  list.innerHTML = room.players.map((p) => `
-    <div class="player-item">
-      <div class="player-avatar ${p.color}">${p.name.charAt(0).toUpperCase()}</div>
-      <span>${p.name}</span>
-      ${p.name === room.host ? '<span class="tag tag-host">Host</span>' : ''}
-    </div>`).join('');
-}
-
-// ---- Marcador global persistente (visible en todas las pantallas de juego) ----
-function renderGlobalScoreBars(room) {
-  const totals = room.totalScores || {};
-  const sorted = room.players.map(p => ({ name: p.name, score: totals[p.id] ?? totals[p.name] ?? 0 })).sort((a,b) => b.score - a.score);
-  const html = sorted.map((p,i) => `<div class="gsb-chip ${p.name===state.playerName?'me':''}">${i===0&&p.score>0?'<span class="gsb-rank1">🥇</span>':''}${p.name}: <b>${p.score}</b></div>`).join('');
-  ['global-score-bar','global-score-bar-jh','global-score-bar-jg','global-score-bar-sf','global-score-bar-sfg','global-score-bar-hh','global-score-bar-hg','global-score-bar-fjg','global-score-bar-hmph','global-score-bar-hmphg','global-score-bar-hmphr','global-score-bar-hmpgv','global-score-bar-hmpgvd','global-score-bar-hmpgg','global-score-bar-hmpgwr','global-score-bar-hmpgr'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) { el.style.display = sorted.length ? 'flex' : 'none'; el.innerHTML = html; }
-  });
-}
-
-function handleGameChange(room) {
-  const currentScreen = document.querySelector('.screen.active').id;
-  const fjScreens = ['screen-fj-guest'];
-  const hmpScreens = ['screen-hmp-role','screen-hmp-guest-voting','screen-hmp-guest-voted','screen-hmp-guest-guessing','screen-hmp-guest-waiting-result','screen-hmp-guest-result'];
-  if (room.game === 'jeopardy' && room.gameState.finalJeopardy) {
-    if (!fjScreens.includes(currentScreen)) { showScreen('screen-fj-guest'); }
-  } else if (room.game === 'jeopardy' && currentScreen !== 'screen-jeopardy-guest') {
-    myBuzzPressed = false; showJeopardyGuest();
-  }
-  else if (room.game === 'soundfishy' && currentScreen !== 'screen-sf-guest') showSFGuest();
-  else if (room.game === 'herd' && currentScreen !== 'screen-herd-guest') showHerdGuest();
-  else if (room.game === 'hmp' && !hmpScreens.includes(currentScreen)) { showScreen('screen-hmp-role'); }
-}
-
-function updateGameUI(room) {
-  if (room.game === 'jeopardy' && room.gameState.finalJeopardy) {
-    if (!state.isHost) {
-      updateFJGuestUI(room);
-    } else {
-      const fj = room.gameState.finalJeopardy;
-      const currentScreen = document.querySelector('.screen.active').id;
-      if (fj.phase === 'wager' && currentScreen === 'screen-fj-host-wager') {
-        renderFJWagerStatus(room);
-      } else if (fj.phase === 'question' && currentScreen === 'screen-fj-host-question') {
-        updateFJAnswerProgress(room);
-      } else if (fj.phase === 'reveal' && currentScreen === 'screen-fj-host-reveal') {
-        renderFJRevealCards(room);
-      }
-    }
-  } else if (room.game === 'jeopardy') updateJeopardyUI(room);
-  else if (room.game === 'soundfishy') updateSFUI(room);
-  else if (room.game === 'herd') updateHerdUI(room);
-  else if (room.game === 'hmp') {
-    if (!state.isHost) {
-      updateHMPGuestUI(room);
-    } else {
-      const currentScreen = document.querySelector('.screen.active').id;
-      if (currentScreen === 'screen-hmp-role') renderHMPRoleListInner(room);
-      else if (currentScreen === 'screen-hmp-host-voting') renderHMPHostVotingList(room);
-      else if (currentScreen === 'screen-hmp-host-guessing') renderHMPGuessProgress(room);
-    }
-  }
-}
-
-// ============================================================
-// HISTORIAL
-// ============================================================
-async function showHistory() {
-  const room = await getRoomData(state.roomCode);
-  if (!room) return;
-  showScreen('screen-history');
-  const totals = room.totalScores || {};
-  const sorted = room.players.map(p => ({ name: p.name, score: totals[p.id] ?? totals[p.name] ?? 0 })).sort((a,b) => b.score - a.score);
-  document.getElementById('history-global-scores').innerHTML = '<tr><th>Jugador</th><th>Puntos totales</th></tr>' +
-    sorted.map((p,i) => `<tr><td class="${i===0?'rank-1':''}">${i===0?'🥇 ':''}${p.name}</td><td>${p.score}</td></tr>`).join('');
-
-  const history = room.history || [];
-  const listEl = document.getElementById('history-list');
-  const emptyEl = document.getElementById('history-empty');
-  if (!history.length) {
-    listEl.innerHTML = ''; emptyEl.style.display = 'block';
-  } else {
-    emptyEl.style.display = 'none';
-    const gameNames = { jeopardy: '📺 Jeopardy', soundfishy: '🐟 Sound Fishy', herd: '🐄 Herd Mentality' };
-    listEl.innerHTML = history.slice().reverse().map(h => {
-      const date = new Date(h.timestamp);
-      const dateStr = date.toLocaleString('es-ES', { day:'numeric', month:'short', hour:'2-digit', minute:'2-digit' });
-      return `<div class="history-card">
-        <div class="history-date">${dateStr}</div>
-        <div class="history-winner">🏆 ${h.winner || 'Sin definir'}</div>
-        <div class="history-games">${gameNames[h.game] || h.game} — ${h.summary || ''}</div>
-      </div>`;
-    }).join('');
-  }
-}
-
-async function addToHistory(game, summary, roundScores) {
-  const room = await getRoomData(state.roomCode);
-  if (!room) return;
-  let winner = null, maxScore = -Infinity;
-  Object.entries(roundScores || {}).forEach(([name, score]) => { if (score > maxScore) { maxScore = score; winner = name; } });
-  const history = room.history || [];
-  history.push({ timestamp: Date.now(), game, winner: maxScore > 0 ? winner : null, summary });
-  await updateRoomData(state.roomCode, { history });
-}
-
-async function addRoundScoresToTotal(roundScores) {
-  const room = await getRoomData(state.roomCode);
-  if (!room) return;
-  const totals = room.totalScores || {};
-  Object.entries(roundScores || {}).forEach(([id, score]) => { totals[id] = (totals[id] || 0) + score; });
-  await updateRoomData(state.roomCode, { totalScores: totals });
-}
-
-// ============================================================
-// JEOPARDY
-// ============================================================
-let jeopardyData = null;
-let currentJCell = null;
-let jpConfig = { size: 3, rows: 4, dd: 1, theme: '' };
-let manualCategories = [];
-
-function goToJeopardySetup() {
-  document.querySelectorAll('#jp-size-select .pill-option').forEach(el => {
-    el.onclick = () => { document.querySelectorAll('#jp-size-select .pill-option').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
-  });
-  document.querySelectorAll('#jp-rows-select .pill-option').forEach(el => {
-    el.onclick = () => { document.querySelectorAll('#jp-rows-select .pill-option').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
-  });
-  document.querySelectorAll('#jp-dd-select .pill-option').forEach(el => {
-    el.onclick = () => { document.querySelectorAll('#jp-dd-select .pill-option').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); };
-  });
-  showScreen('screen-jeopardy-setup');
-}
-
-function readJPConfig() {
-  jpConfig.size = parseInt(document.querySelector('#jp-size-select .selected').dataset.val);
-  jpConfig.rows = parseInt(document.querySelector('#jp-rows-select .selected').dataset.val);
-  jpConfig.dd = parseInt(document.querySelector('#jp-dd-select .selected').dataset.val);
-  jpConfig.theme = document.getElementById('jp-theme').value.trim() || 'Día del Padre y familia';
-}
-
-async function goToJeopardyAIConfirm() {
-  readJPConfig();
-  jeopardyData = null;
-  await startGame('jeopardy');
-}
-
-function goToJeopardyManualEdit() {
-  readJPConfig();
-  manualCategories = Array.from({length: jpConfig.size}, () => ({
-    name: '', questions: Array.from({length: jpConfig.rows}, (_, i) => ({ points: (i+1)*100, question: '', answer: '' }))
-  }));
-  renderManualEditForm();
-  showScreen('screen-jeopardy-manual');
-}
-
-let jpUploadedRows = [];
-function goToJeopardyFileUpload() {
-  readJPConfig();
-  document.getElementById('jp-file-preview').style.display = 'none';
-  document.getElementById('jp-file-use-btn').style.display = 'none';
-  showScreen('screen-jeopardy-file');
-}
-
-function handleJPFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  parseUploadedFile(file, (rows) => {
-    jpUploadedRows = rows.filter(r => r.categoria && r.pregunta);
-    const previewEl = document.getElementById('jp-file-preview');
-    if (!jpUploadedRows.length) {
-      previewEl.innerHTML = '<div class="text-sm">No se encontraron filas válidas. Verifica las columnas "categoria", "puntos", "pregunta", "respuesta".</div>';
-      previewEl.style.display = 'block';
-      document.getElementById('jp-file-use-btn').style.display = 'none';
-      return;
-    }
-    const cats = [...new Set(jpUploadedRows.map(r => r.categoria))];
-    previewEl.innerHTML = `<div class="text-sm mb1"><b>${cats.length}</b> categorías, <b>${jpUploadedRows.length}</b> preguntas</div>` +
-      jpUploadedRows.map((r,i) => `<div class="upload-preview-row">${r.categoria} — $${r.puntos}: ${r.pregunta}</div>`).join('');
-    previewEl.style.display = 'block';
-    document.getElementById('jp-file-use-btn').style.display = 'block';
-  }, () => alert('No se pudo leer el archivo. Verifica el formato.'));
-}
-
-async function useUploadedJPBoard() {
-  if (!jpUploadedRows.length) return;
-  const catNames = [...new Set(jpUploadedRows.map(r => r.categoria))];
-  jeopardyData = {
-    used: {},
-    categories: catNames.map(name => ({
-      name,
-      questions: jpUploadedRows.filter(r => r.categoria === name).map(r => ({
-        points: parseInt(r.puntos) || 100,
-        question: r.pregunta,
-        answer: r.respuesta || ''
-      })).sort((a,b) => a.points - b.points)
-    }))
-  };
-  jpConfig.size = catNames.length;
-  jpConfig.rows = Math.max(...jeopardyData.categories.map(c => c.questions.length));
-  await assignDailyDoubles();
-  await startGame('jeopardy', true);
-}
-
-function renderManualEditForm() {
-  const container = document.getElementById('jp-manual-categories');
-  container.innerHTML = manualCategories.map((cat, ci) => `
-    <div class="cat-edit-card">
-      <input type="text" placeholder="Nombre de categoría ${ci+1}" value="${cat.name}" oninput="manualCategories[${ci}].name = this.value">
-      ${cat.questions.map((q, qi) => `
-        <div class="q-edit-row">
-          <div class="q-edit-label">$${q.points}</div>
-          <div style="flex:1;">
-            <input type="text" placeholder="Pregunta" value="${q.question}" oninput="manualCategories[${ci}].questions[${qi}].question = this.value">
-            <input type="text" placeholder="Respuesta" value="${q.answer}" oninput="manualCategories[${ci}].questions[${qi}].answer = this.value" style="margin-bottom:0;">
-          </div>
-        </div>
-      `).join('')}
-    </div>
-  `).join('');
-}
-
-async function finishManualJeopardy() {
-  const hasEmpty = manualCategories.some(c => !c.name || c.questions.some(q => !q.question || !q.answer));
-  if (hasEmpty) {
-    if (!confirm('Algunas categorías o preguntas están incompletas. ¿Quieres que la IA complete lo que falta?')) return;
-  }
-  jeopardyData = { categories: manualCategories, used: {} };
-  await assignDailyDoubles();
-  await startGame('jeopardy', true);
-}
-
-async function assignDailyDoubles() {
-  jeopardyData.dailyDoubles = {};
-  const allCells = [];
-  jeopardyData.categories.forEach((cat, ci) => cat.questions.forEach((q, qi) => { if (qi > 0) allCells.push(`${ci}-${qi}`); }));
-  for (let i = 0; i < jpConfig.dd && allCells.length; i++) {
-    const idx = Math.floor(Math.random() * allCells.length);
-    jeopardyData.dailyDoubles[allCells.splice(idx,1)[0]] = true;
-  }
-}
-
-async function startGame(game, skipScoreReset) {
-  const room = await getRoomData(state.roomCode);
-  const gameState = { scores: Object.fromEntries(room.players.map(p => [p.id, 0])) };
-  if (game === 'jeopardy') gameState.jpConfig = jpConfig;
-  await updateRoomData(state.roomCode, { game, gameState });
-  if (game === 'jeopardy') showJeopardyHost();
-  else if (game === 'soundfishy') showSFHost();
-  else if (game === 'herd') showHerdHost();
-}
-
-async function showJeopardyHost() {
-  showScreen('screen-jeopardy-host');
-  document.getElementById('jeopardy-host-title').textContent = jpConfig.theme ? `Jeopardy — ${jpConfig.theme}` : 'Jeopardy — Tablero';
-  document.getElementById('jeopardy-loading').style.display = 'block';
-  document.getElementById('jeopardy-board').style.display = 'none';
-  if (!jeopardyData || !jeopardyData.categories) { await generateJeopardyBoard(); }
-  if (!jeopardyData.dailyDoubles) { await assignDailyDoubles(); }
-  setupGridColumns();
-  renderJeopardyBoard();
-}
-
-function showJeopardyGuest() { showScreen('screen-jeopardy-guest'); }
-
-function setupGridColumns() {
-  document.getElementById('j-grid').style.gridTemplateColumns = `repeat(${jpConfig.size}, 1fr)`;
-}
-
-async function generateJeopardyBoard() {
-  try {
-    const res = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        max_tokens: 1500,
-        messages: [{
-          role: 'user',
-          content: `Genera un tablero de Jeopardy con ${jpConfig.size} categorías y ${jpConfig.rows} preguntas cada una (valores de 100 hasta ${jpConfig.rows*100} de 100 en 100). El tema es: "${jpConfig.theme}". Responde SOLO con JSON válido sin explicaciones ni backticks, con este formato exacto: {"categories":[{"name":"NOMBRE CATEGORIA","questions":[{"points":100,"question":"pregunta en formato jeopardy (la respuesta es...?)","answer":"La respuesta"}]}]}`
-        }]
-      })
-    });
-    const data = await res.json();
-    let text = data.content[0].text.replace(/```json|```/g,'').trim();
-    jeopardyData = JSON.parse(text);
-    jeopardyData.used = {};
-  } catch(e) {
-    jeopardyData = {
-      used: {},
-      categories: Array.from({length: jpConfig.size}, (_, ci) => ({
-        name: `CATEGORÍA ${ci+1}`,
-        questions: Array.from({length: jpConfig.rows}, (_, qi) => ({
-          points: (qi+1)*100,
-          question: `Pregunta de ejemplo ${qi+1} sobre ${jpConfig.theme}`,
-          answer: `Respuesta de ejemplo ${qi+1}`
-        }))
-      }))
-    };
-  }
-}
-
-function renderJeopardyBoard() {
-  document.getElementById('jeopardy-loading').style.display = 'none';
-  document.getElementById('jeopardy-board').style.display = 'block';
-  const grid = document.getElementById('j-grid');
-  let html = '';
-  jeopardyData.categories.forEach(cat => { html += `<div class="j-category">${cat.name}</div>`; });
-  jeopardyData.categories.forEach((cat, ci) => {
-    cat.questions.forEach((q, qi) => {
-      const key = `${ci}-${qi}`;
-      const used = jeopardyData.used[key];
-      const isDD = jeopardyData.dailyDoubles && jeopardyData.dailyDoubles[key];
-      html += used
-        ? `<div class="j-cell used">—</div>`
-        : `<div class="j-cell ${isDD?'dd':''}" onclick="openJQuestion(${ci},${qi})">$${q.points}</div>`;
-    });
-  });
-  grid.innerHTML = html;
-  renderJScores();
-}
-
-async function openJQuestion(ci, qi) {
-  const key = `${ci}-${qi}`;
-  const isDD = jeopardyData.dailyDoubles && jeopardyData.dailyDoubles[key];
-  currentJCell = { ci, qi, isDD, wager: null };
-
-  if (isDD) {
-    const room = await getRoomData(state.roomCode);
-    document.getElementById('j-dd-player-label').innerHTML = `¿Quién eligió esta casilla?<br><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:10px;">` +
-      room.players.map(p => `<button class="btn btn-sm btn-amber" onclick="selectDDPlayer('${p.id}')">${p.name}</button>`).join('') + `</div>`;
-    document.getElementById('j-dd-wager-area').style.display = 'block';
-    return;
-  }
-  openQuestionDisplay(ci, qi);
-}
-
-let ddPlayerId = null;
-function selectDDPlayer(playerId) {
-  ddPlayerId = playerId;
-  document.getElementById('j-dd-player-label').innerHTML = `Jugador: <b>${playerId}</b>`;
-}
-
-function confirmDDWager() {
-  if (!ddPlayerId) { alert('Selecciona quién eligió la casilla'); return; }
-  const wager = parseInt(document.getElementById('j-dd-wager-input').value) || 0;
-  currentJCell.wager = wager;
-  currentJCell.wagerPlayer = ddPlayerId;
-  document.getElementById('j-dd-wager-area').style.display = 'none';
-  document.getElementById('j-dd-wager-input').value = '';
-  openQuestionDisplay(currentJCell.ci, currentJCell.qi);
-}
-
-async function openQuestionDisplay(ci, qi) {
-  const q = jeopardyData.categories[ci].questions[qi];
-  document.getElementById('j-q-label').textContent = `${jeopardyData.categories[ci].name} — $${q.points}` + (currentJCell.isDD ? ` (Daily Double, apuesta: ${currentJCell.wager})` : '');
-  document.getElementById('j-q-text').textContent = q.question;
-  document.getElementById('j-q-answer').textContent = q.answer;
-  document.getElementById('j-q-answer').style.display = 'none';
-  document.getElementById('j-question-area').style.display = 'block';
-  document.getElementById('j-buzzer-winner').style.display = 'none';
-  document.getElementById('j-buzzer-status').style.display = 'block';
-
-  // Reset buzzer state in Firebase
-  await updateRoomData(state.roomCode, { gameState: { ...(await getRoomData(state.roomCode)).gameState, buzzer: { active: true, winner: null, ts: Date.now() } } });
-
-  renderPointButtons(ci, qi);
-}
-
-async function renderPointButtons(ci, qi) {
-  const q = jeopardyData.categories[ci].questions[qi];
-  const points = currentJCell.isDD ? currentJCell.wager : q.points;
-  const room = await getRoomData(state.roomCode);
-  const ptBtns = document.getElementById('j-point-btns');
-  const minusBtns = document.getElementById('j-minus-point-btns');
-  ptBtns.innerHTML = room.players.map(p =>
-    `<button class="btn btn-sm btn-amber" onclick="awardJPoints('${p.id}',${points})">${p.name} +${points}</button>`
-  ).join('');
-  minusBtns.innerHTML = room.players.map(p =>
-    `<button class="btn btn-sm" onclick="awardJPoints('${p.id}',-${points})">${p.name} -${points}</button>`
-  ).join('');
-}
-
-function showJAnswer() { document.getElementById('j-q-answer').style.display = 'block'; }
-
-async function resetBuzzer() {
-  const room = await getRoomData(state.roomCode);
-  room.gameState.buzzer = { active: true, winner: null, ts: Date.now() };
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  document.getElementById('j-buzzer-winner').style.display = 'none';
-  document.getElementById('j-buzzer-status').style.display = 'block';
-}
-
-async function closeJQuestion() {
-  if (currentJCell) {
-    const key = `${currentJCell.ci}-${currentJCell.qi}`;
-    jeopardyData.used[key] = true;
-  }
-  document.getElementById('j-question-area').style.display = 'none';
-  const room = await getRoomData(state.roomCode);
-  room.gameState.buzzer = { active: false, winner: null };
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  renderJeopardyBoard();
-}
-
-async function awardJPoints(playerId, points) {
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.scores) room.gameState.scores = {};
-  room.gameState.scores[playerId] = (room.gameState.scores[playerId] || 0) + points;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  soundCorrect();
-  renderJScores();
-}
-
-async function renderJScores() {
-  const room = await getRoomData(state.roomCode);
-  if (!room) return;
-  const scores = room.gameState.scores || {};
-  const sorted = room.players.map(p => ({ name: p.name, score: scores[p.id] || 0 })).sort((a,b) => b.score - a.score);
-  const tbl = document.getElementById('j-scores-table');
-  tbl.innerHTML = '<tr><th>Jugador</th><th>Puntos</th></tr>' +
-    sorted.map((p,i) => `<tr><td class="${i===0?'rank-1':''}">${i===0?'🥇 ':''}${p.name}</td><td>$${p.score}</td></tr>`).join('');
-}
-
-async function finishJeopardyRound() {
-  const room = await getRoomData(state.roomCode);
-  const scores = room.gameState.scores || {};
-  await addRoundScoresToTotal(scores);
-  await addToHistory('jeopardy', jpConfig.theme || 'Día del Padre', scores);
-  soundWin();
-  launchConfetti();
-  await backToLobby();
-}
-
-let lastBuzzerWinner = null;
-function updateJeopardyUI(room) {
-  const buzzer = room.gameState.buzzer || {};
-  if (!state.isHost) {
-    const scores = room.gameState.scores || {};
-    const myScore = scores[state.playerName] || 0;
-    document.getElementById('my-j-score').textContent = myScore;
-    const sorted = room.players.map(p => ({ name: p.name, score: scores[p.id] || 0 })).sort((a,b) => b.score - a.score);
-    const tbl = document.getElementById('guest-j-scores');
-    if (tbl) tbl.innerHTML = '<tr><th>Jugador</th><th>Puntos</th></tr>' +
-      sorted.map((p,i) => `<tr><td class="${i===0?'rank-1':''}">${i===0?'🥇 ':''}${p.name}</td><td>$${p.score}</td></tr>`).join('');
-
-    // Buzzer UI for guest
-    const idleArea = document.getElementById('jg-idle-area');
-    const buzzerArea = document.getElementById('jg-buzzer-area');
-    const buzzerBtn = document.getElementById('jg-buzzer-btn');
-    const resultEl = document.getElementById('jg-buzzer-result');
-    if (buzzer.active) {
-      idleArea.style.display = 'none';
-      buzzerArea.style.display = 'block';
-      if (buzzer.winner) {
-        buzzerBtn.disabled = true;
-        resultEl.textContent = buzzer.winner === state.playerName ? '🎉 ¡Presionaste primero!' : `${buzzer.winner} presionó primero`;
-      } else {
-        buzzerBtn.disabled = myBuzzPressed;
-        resultEl.textContent = myBuzzPressed ? 'Buzzer presionado, esperando...' : '';
-      }
-    } else {
-      idleArea.style.display = 'block';
-      buzzerArea.style.display = 'none';
-      myBuzzPressed = false;
-    }
-  } else {
-    renderJScores();
-    // Host sees who won the buzzer
-    if (buzzer.winner && buzzer.winner !== lastBuzzerWinner) {
-      lastBuzzerWinner = buzzer.winner;
-      document.getElementById('j-buzzer-status').style.display = 'none';
-      document.getElementById('j-buzzer-winner').style.display = 'block';
-      document.getElementById('j-buzzer-winner').textContent = `🔔 ¡${buzzer.winner} presionó primero!`;
-      soundBuzzer();
-    }
-    if (!buzzer.winner) { lastBuzzerWinner = null; }
-  }
-}
-
-async function pressBuzzer() {
-  if (myBuzzPressed) return;
-  myBuzzPressed = true;
-  soundClick();
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.buzzer || room.gameState.buzzer.winner) return; // someone already won
-  room.gameState.buzzer.winner = state.playerName;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-}
-
-// ============================================================
-// FINAL JEOPARDY
-// ============================================================
-let fjMyWagerSubmitted = false;
-let fjMyAnswerSubmitted = false;
-let fjRevealIndex = 0;
-let fjRevealOrder = [];
-
-function goToFinalJeopardySetup() {
-  showScreen('screen-fj-setup');
-}
-
-function fjTab(t) {
-  document.querySelectorAll('#screen-fj-setup .tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='ai')||(i===1&&t==='manual')));
-  document.getElementById('fj-ai-tab').style.display = t==='ai'?'block':'none';
-  document.getElementById('fj-manual-tab').style.display = t==='manual'?'block':'none';
-}
-
-async function generateFJQuestion() {
-  const category = document.getElementById('fj-category').value.trim() || jpConfig.theme || 'Familia';
-  const btn = document.getElementById('fj-gen-btn');
-  btn.textContent = 'Generando...'; btn.disabled = true;
-  try {
-    const res = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        max_tokens: 300,
-        messages: [{ role: 'user', content: `Genera UNA pregunta desafiante de "Final Jeopardy" sobre el tema: "${category}". Debe requerir pensar, no ser trivial. Responde SOLO con JSON: {"question":"la pregunta aquí","answer":"la respuesta correcta"}` }]
-      })
-    });
-    const data = await res.json();
-    let text = data.content[0].text.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(text);
-    await startFinalJeopardy(category, parsed.question, parsed.answer);
-  } catch(e) {
-    await startFinalJeopardy(category, `Pregunta final sobre ${category}`, 'Respuesta de ejemplo');
-  }
-  btn.textContent = '✨ Generar pregunta final'; btn.disabled = false;
-}
-
-async function useManualFJQuestion() {
-  const category = document.getElementById('fj-category').value.trim() || 'Final';
-  const question = document.getElementById('fj-manual-question').value.trim();
-  const answer = document.getElementById('fj-manual-answer').value.trim();
-  if (!question || !answer) { alert('Completa la pregunta y la respuesta'); return; }
-  await startFinalJeopardy(category, question, answer);
-}
-
-async function startFinalJeopardy(category, question, answer) {
-  const room = await getRoomData(state.roomCode);
-  room.gameState.finalJeopardy = {
-    phase: 'wager', // wager -> question -> reveal -> done
-    category, question, answer,
-    wagers: {}, answers: {},
-    maxWager: room.gameState.scores || {}
-  };
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showFJHostWager(room);
-}
-
-function showFJHostWager(room) {
-  showScreen('screen-fj-host-wager');
-  document.getElementById('fj-host-category').textContent = room.gameState.finalJeopardy.category;
-  renderFJWagerStatus(room);
-}
-
-function renderFJWagerStatus(room) {
-  const fj = room.gameState.finalJeopardy;
-  if (!fj) return;
-  const wagers = fj.wagers || {};
-  const listEl = document.getElementById('fj-wager-status-list');
-  if (listEl) {
-    listEl.innerHTML = room.players.map(p => {
-      const ready = wagers[p.id] !== undefined;
-      return `<div class="fj-wager-card"><span><span class="fj-status-dot ${ready?'ready':''}"></span> ${p.name}</span><span class="text-sm">${ready ? '✅ Apostó' : 'Pensando...'}</span></div>`;
-    }).join('');
-  }
-  const btn = document.getElementById('fj-reveal-q-btn');
-  if (btn) {
-    const allReady = room.players.every(p => wagers[p.id] !== undefined);
-    btn.textContent = allReady ? 'Todos listos — Mostrar la pregunta' : `Esperando apuestas (${Object.keys(wagers).length}/${room.players.length})`;
-  }
-}
-
-async function revealFJQuestion() {
-  const room = await getRoomData(state.roomCode);
-  room.gameState.finalJeopardy.phase = 'question';
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showFJHostQuestion(room);
-}
-
-function showFJHostQuestion(room) {
-  showScreen('screen-fj-host-question');
-  document.getElementById('fj-host-q-text').textContent = room.gameState.finalJeopardy.question;
-  updateFJAnswerProgress(room);
-}
-
-function updateFJAnswerProgress(room) {
-  const fj = room.gameState.finalJeopardy;
-  const answers = fj.answers || {};
-  const count = Object.keys(answers).length;
-  const total = room.players.length;
-  document.getElementById('fj-answer-count').textContent = count;
-  document.getElementById('fj-answer-total').textContent = total;
-  document.getElementById('fj-answer-progress').style.width = (total>0?count/total*100:0)+'%';
-}
-
-async function startFJReveal() {
-  const room = await getRoomData(state.roomCode);
-  room.gameState.finalJeopardy.phase = 'reveal';
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  fjRevealIndex = 0;
-  const wagers = room.gameState.finalJeopardy.wagers || {};
-  // Reveal in ascending order of wager (lowest first, builds suspense)
-  fjRevealOrder = room.players.map(p => p.id).sort((a,b) => (wagers[a]||0) - (wagers[b]||0));
-  showScreen('screen-fj-host-reveal');
-  document.getElementById('fj-correct-answer-box').textContent = '✅ Respuesta correcta: ' + room.gameState.finalJeopardy.answer;
-  document.getElementById('fj-finish-btn').style.display = 'none';
-  renderFJRevealCards(room, true);
-}
-
-function renderFJRevealCards(room, onlyControls) {
-  const fj = room.gameState.finalJeopardy;
-  const wagers = fj.wagers || {};
-  const answers = fj.answers || {};
-  const container = document.getElementById('fj-reveal-cards');
-  let html = '';
-  fjRevealOrder.forEach((id, idx) => {
-    const player = room.players.find(p => p.id === id);
-    const visible = idx <= fjRevealIndex;
-    if (!visible) return;
-    const wager = wagers[id] || 0;
-    const ans = answers[id] || '(sin respuesta)';
-    const judged = fj.judged && fj.judged[id] !== undefined;
-    html += `<div class="fj-reveal-card">
-      <div class="fj-reveal-name">${player ? player.name : id}</div>
-      <div class="fj-reveal-wager">Apostó: ${wager} pts</div>
-      <div class="fj-reveal-answer">"${ans}"</div>
-      ${judged ? `<div class="text-sm">${fj.judged[id] ? '✅ Correcto +' + wager : '❌ Incorrecto -' + wager}</div>` :
-        `<div class="btn-row"><button class="btn btn-sm btn-success" onclick="judgeFJAnswer('${id}', true, ${wager})">✅ Correcto</button><button class="btn btn-sm" onclick="judgeFJAnswer('${id}', false, ${wager})">❌ Incorrecto</button></div>`}
-    </div>`;
-  });
-  container.innerHTML = html;
-
-  // Show "next" button if there are more to reveal and current one is judged
-  const currentId = fjRevealOrder[fjRevealIndex];
-  const currentJudged = fj.judged && fj.judged[currentId] !== undefined;
-  if (currentJudged && fjRevealIndex < fjRevealOrder.length - 1) {
-    container.innerHTML += `<button class="btn btn-primary" onclick="nextFJReveal()">Revelar siguiente jugador →</button>`;
-  } else if (currentJudged && fjRevealIndex === fjRevealOrder.length - 1) {
-    document.getElementById('fj-finish-btn').style.display = 'block';
-  }
-}
-
-async function judgeFJAnswer(playerId, correct, wager) {
-  const room = await getRoomData(state.roomCode);
-  const fj = room.gameState.finalJeopardy;
-  if (!fj.judged) fj.judged = {};
-  fj.judged[playerId] = correct;
-  room.gameState.scores = room.gameState.scores || {};
-  room.gameState.scores[playerId] = (room.gameState.scores[playerId] || 0) + (correct ? wager : -wager);
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  correct ? soundCorrect() : soundWrong();
-  renderFJRevealCards(room);
-}
-
-function nextFJReveal() {
-  fjRevealIndex++;
-  getRoomData(state.roomCode).then(room => renderFJRevealCards(room));
-}
-
-async function finishFinalJeopardy() {
-  const room = await getRoomData(state.roomCode);
-  const scores = room.gameState.scores || {};
-  await addRoundScoresToTotal(scores);
-  await addToHistory('jeopardy', (jpConfig.theme || 'Final Jeopardy') + ' (con Final)', scores);
-  soundWin();
-  launchConfetti();
-  await backToLobby();
-}
-
-// ---- Guest side: wager + answer submission ----
-async function submitFJWager() {
-  const val = parseInt(document.getElementById('fjg-wager-input').value);
-  if (isNaN(val) || val < 0) { alert('Ingresa una apuesta válida'); return; }
-  fjMyWagerSubmitted = true;
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.finalJeopardy.wagers) room.gameState.finalJeopardy.wagers = {};
-  room.gameState.finalJeopardy.wagers[state.playerName] = val;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  document.getElementById('fjg-wager-phase').style.display = 'none';
-  document.getElementById('fjg-wager-locked').style.display = 'block';
-}
-
-async function submitFJAnswer() {
-  const val = document.getElementById('fjg-answer-input').value.trim();
-  if (!val) { alert('Escribe tu respuesta'); return; }
-  fjMyAnswerSubmitted = true;
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.finalJeopardy.answers) room.gameState.finalJeopardy.answers = {};
-  room.gameState.finalJeopardy.answers[state.playerName] = val;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  document.getElementById('fjg-question-phase').style.display = 'none';
-  document.getElementById('fjg-answer-locked').style.display = 'block';
-}
-
-function updateFJGuestUI(room) {
-  const fj = room.gameState.finalJeopardy;
-  if (!fj) return;
-  const currentScreen = document.querySelector('.screen.active').id;
-  if (currentScreen !== 'screen-fj-guest') {
-    fjMyWagerSubmitted = false; fjMyAnswerSubmitted = false;
-    showScreen('screen-fj-guest');
-  }
-  const scores = room.gameState.scores || {};
-  const myScore = scores[state.playerName] || 0;
-
-  if (fj.phase === 'wager') {
-    document.getElementById('fjg-question-phase').style.display = 'none';
-    document.getElementById('fjg-answer-locked').style.display = 'none';
-    document.getElementById('fjg-results-phase').style.display = 'none';
-    if (fjMyWagerSubmitted || (fj.wagers && fj.wagers[state.playerName] !== undefined)) {
-      document.getElementById('fjg-wager-phase').style.display = 'none';
-      document.getElementById('fjg-wager-locked').style.display = 'block';
-    } else {
-      document.getElementById('fjg-wager-phase').style.display = 'block';
-      document.getElementById('fjg-wager-locked').style.display = 'none';
-      document.getElementById('fjg-category').textContent = fj.category;
-      document.getElementById('fjg-max-wager').textContent = myScore;
-    }
-  } else if (fj.phase === 'question') {
-    document.getElementById('fjg-wager-phase').style.display = 'none';
-    document.getElementById('fjg-wager-locked').style.display = 'none';
-    document.getElementById('fjg-results-phase').style.display = 'none';
-    if (fjMyAnswerSubmitted || (fj.answers && fj.answers[state.playerName] !== undefined)) {
-      document.getElementById('fjg-question-phase').style.display = 'none';
-      document.getElementById('fjg-answer-locked').style.display = 'block';
-    } else {
-      document.getElementById('fjg-question-phase').style.display = 'block';
-      document.getElementById('fjg-answer-locked').style.display = 'none';
-      document.getElementById('fjg-question-text').textContent = fj.question;
-    }
-  } else if (fj.phase === 'reveal' || fj.phase === 'done') {
-    document.getElementById('fjg-wager-phase').style.display = 'none';
-    document.getElementById('fjg-wager-locked').style.display = 'none';
-    document.getElementById('fjg-question-phase').style.display = 'none';
-    document.getElementById('fjg-answer-locked').style.display = 'none';
-    document.getElementById('fjg-results-phase').style.display = 'block';
-    const sorted = room.players.map(p => ({ name: p.name, score: scores[p.id] || 0 })).sort((a,b) => b.score - a.score);
-    document.getElementById('fjg-final-scores').innerHTML = '<tr><th>Jugador</th><th>Puntos</th></tr>' +
-      sorted.map((p,i) => `<tr><td class="${i===0?'rank-1':''}">${i===0?'🥇 ':''}${p.name}</td><td>$${p.score}</td></tr>`).join('');
-  }
-}
-
-
-let myVote = null;
-
-function showSFHost() { showScreen('screen-sf-host'); }
-function showSFGuest() { showScreen('screen-sf-guest'); }
-
-function sfTab(t) {
-  document.querySelectorAll('#screen-sf-host .tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='ai')||(i===1&&t==='manual')||(i===2&&t==='file')));
-  document.getElementById('sf-ai-tab').style.display = t==='ai'?'block':'none';
-  document.getElementById('sf-manual-tab').style.display = t==='manual'?'block':'none';
-  document.getElementById('sf-file-tab').style.display = t==='file'?'block':'none';
-}
-
-let sfUploadedQueue = [];
-function handleSFFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  parseUploadedFile(file, (rows) => {
-    sfUploadedQueue = rows.map(r => {
-      const truthVal = (r.es_verdad || '').toString().toLowerCase();
-      const isTrue = truthVal === 'true' || truthVal === 'verdadero' || truthVal === 'si' || truthVal === 'sí' || truthVal === '1';
-      return { statement: r.afirmacion, isTrue };
-    }).filter(r => r.statement);
-    const previewEl = document.getElementById('sf-file-preview');
-    if (!sfUploadedQueue.length) {
-      previewEl.innerHTML = '<div class="text-sm">No se encontraron afirmaciones válidas. Verifica las columnas "afirmacion" y "es_verdad".</div>';
-      previewEl.style.display = 'block';
-      document.getElementById('sf-file-use-btn').style.display = 'none';
-      return;
-    }
-    previewEl.innerHTML = sfUploadedQueue.map((r,i) => `<div class="upload-preview-row">${i+1}. ${r.statement} <b>(${r.isTrue?'Verdad':'Mentira'})</b></div>`).join('');
-    previewEl.style.display = 'block';
-    document.getElementById('sf-file-use-btn').style.display = 'block';
-    document.getElementById('sf-file-use-btn').textContent = `Usar estas ${sfUploadedQueue.length} afirmaciones`;
-  }, () => alert('No se pudo leer el archivo. Verifica el formato.'));
-}
-
-async function useUploadedSFQueue() {
-  if (!sfUploadedQueue.length) return;
-  const room = await getRoomData(state.roomCode);
-  room.gameState.sfFileQueue = sfUploadedQueue;
-  room.gameState.sfFileQueueIndex = 0;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  await sendSFStatement(sfUploadedQueue[0].statement, sfUploadedQueue[0].isTrue);
-}
-
-async function generateSFStatement() {
-  const btn = document.getElementById('sf-gen-btn');
-  const hint = document.getElementById('sf-dad-hint').value.trim();
-  btn.textContent = 'Generando...'; btn.disabled = true;
-  try {
-    const res = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        max_tokens: 200,
-        messages: [{ role: 'user', content: `Genera UNA afirmación divertida sobre un papá o familia para el juego Sound Fishy (puede ser verdad o mentira creíble). ${hint?'Contexto: '+hint:''} Responde SOLO con JSON: {"statement":"la afirmación aquí","isTrue":true}` }]
-      })
-    });
-    const data = await res.json();
-    let text = data.content[0].text.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(text);
-    await sendSFStatement(parsed.statement, parsed.isTrue);
-  } catch(e) {
-    const examples = [
-      {statement:"Papá sabe cocinar más de 5 platos diferentes", isTrue: Math.random()>0.5},
-      {statement:"Papá recuerda el nombre del primer maestro de cada hijo", isTrue: Math.random()>0.5},
-      {statement:"Papá nunca se ha perdido yendo a algún lugar", isTrue: false},
-    ];
-    const ex = examples[Math.floor(Math.random()*examples.length)];
-    await sendSFStatement(ex.statement, ex.isTrue);
-  }
-  btn.textContent = 'Generar afirmación'; btn.disabled = false;
-}
-
-async function sendManualSF() {
-  const text = document.getElementById('sf-manual-text').value.trim();
-  const isTrue = document.getElementById('sf-manual-type').value === 'true';
-  if (!text) { alert('Escribe una afirmación'); return; }
-  await sendSFStatement(text, isTrue);
-}
-
-async function sendSFStatement(statement, isTrue) {
-  myVote = null;
-  const room = await getRoomData(state.roomCode);
-  room.gameState.sfStatement = statement;
-  room.gameState.sfIsTrue = isTrue;
-  room.gameState.sfVotes = {};
-  room.gameState.sfRevealed = false;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showSFStatementHost(statement);
-}
-
-function showSFStatementHost(stmt) {
-  document.getElementById('sf-current-statement').style.display = 'block';
-  document.getElementById('sf-stmt-text').textContent = stmt;
-  document.getElementById('sf-votes-area').style.display = 'block';
-  document.getElementById('sf-result-area').style.display = 'none';
-}
-
-function updateSFVoteCount(room) {
-  const votes = room.gameState.sfVotes || {};
-  const voteCount = Object.keys(votes).length;
-  const total = room.players.filter(p => p.id !== room.host).length;
-  document.getElementById('sf-vote-count').textContent = voteCount;
-  document.getElementById('sf-total-players').textContent = total;
-  const pct = total > 0 ? (voteCount / total * 100) : 0;
-  document.getElementById('sf-vote-progress').style.width = pct + '%';
-}
-
-async function revealSFResult() {
-  const room = await getRoomData(state.roomCode);
-  const votes = room.gameState.sfVotes || {};
-  room.players.forEach(p => {
-    if (p.id === room.host) return;
-    const vote = votes[p.id];
-    const correct = vote !== undefined && (vote === 'true') === room.gameState.sfIsTrue;
-    if (correct) { room.gameState.scores = room.gameState.scores || {}; room.gameState.scores[p.id] = (room.gameState.scores[p.id]||0) + 1; }
-  });
-  room.gameState.sfRevealed = true;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showSFResultHost(room);
-}
-
-function showSFResultHost(room) {
-  document.getElementById('sf-votes-area').style.display = 'none';
-  document.getElementById('sf-result-area').style.display = 'block';
-  const isTrue = room.gameState.sfIsTrue;
-  document.getElementById('sf-answer-reveal').textContent = isTrue ? '✅ ¡ERA VERDAD!' : '🐟 ¡ERA MENTIRA!';
-  const votes = room.gameState.sfVotes || {};
-  let html = '';
-  room.players.forEach(p => {
-    if (p.id === room.host) return;
-    const vote = votes[p.id];
-    const correct = vote !== undefined && (vote === 'true') === isTrue;
-    const icon = vote === 'true' ? '✅' : vote === 'false' ? '🐟' : '—';
-    html += `<div class="player-item">${icon} ${p.name} — ${correct ? '<span style="color:#3B6D11">+1 punto</span>' : 'sin punto'}</div>`;
-  });
-  document.getElementById('sf-vote-results').innerHTML = html;
-}
-
-async function nextSFRound() {
-  document.getElementById('sf-current-statement').style.display = 'none';
-  myVote = null;
-  const room = await getRoomData(state.roomCode);
-  const queue = room.gameState.sfFileQueue;
-  if (queue && room.gameState.sfFileQueueIndex < queue.length - 1) {
-    room.gameState.sfFileQueueIndex++;
-    const next = queue[room.gameState.sfFileQueueIndex];
-    room.gameState.sfStatement = null;
-    room.gameState.sfRevealed = false;
-    await updateRoomData(state.roomCode, { gameState: room.gameState });
-    await sendSFStatement(next.statement, next.isTrue);
-  } else {
-    room.gameState.sfStatement = null;
-    room.gameState.sfRevealed = false;
-    await updateRoomData(state.roomCode, { gameState: room.gameState });
-  }
-}
-
-async function castVote(vote) {
-  myVote = vote;
-  soundClick();
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.sfVotes) room.gameState.sfVotes = {};
-  room.gameState.sfVotes[state.playerName] = vote;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  document.getElementById('sf-guest-vote').style.display = 'none';
-  document.getElementById('sf-guest-voted').style.display = 'block';
-}
-
-function updateSFUI(room) {
-  if (state.isHost) {
-    updateSFVoteCount(room);
-    if (room.gameState.sfRevealed) { showSFResultHost(room); }
-  } else {
-    const stmt = room.gameState.sfStatement;
-    if (!stmt) {
-      document.getElementById('sf-guest-wait').style.display = 'block';
-      document.getElementById('sf-guest-vote').style.display = 'none';
-      document.getElementById('sf-guest-voted').style.display = 'none';
-      document.getElementById('sf-guest-result').style.display = 'none';
-      myVote = null;
-    } else if (room.gameState.sfRevealed) {
-      document.getElementById('sf-guest-wait').style.display = 'none';
-      document.getElementById('sf-guest-vote').style.display = 'none';
-      document.getElementById('sf-guest-voted').style.display = 'none';
-      document.getElementById('sf-guest-result').style.display = 'block';
-      const isTrue = room.gameState.sfIsTrue;
-      document.getElementById('sf-guest-answer-reveal').textContent = isTrue ? '✅ ¡ERA VERDAD!' : '🐟 ¡ERA MENTIRA!';
-      const correct = myVote !== null && (myVote === 'true') === isTrue;
-      const scores = room.gameState.scores || {};
-      const sorted = room.players.map(p => ({ name: p.name, score: scores[p.id] || 0 })).sort((a,b) => b.score - a.score);
-      document.getElementById('sf-guest-vote-results').innerHTML = `<div class="text-center" style="font-size:24px;padding:0.5rem 0">${correct ? '🎉 ¡Correcto! +1 punto' : '😅 Sin punto esta vez'}</div>`;
-      document.getElementById('sf-guest-scores').innerHTML = '<tr><th>Jugador</th><th>Pts</th></tr>' +
-        sorted.map((p,i) => `<tr><td class="${i===0?'rank-1':''}">${i===0?'🥇 ':''}${p.name}</td><td>${p.score}</td></tr>`).join('');
-    } else if (!myVote) {
-      document.getElementById('sf-guest-wait').style.display = 'none';
-      document.getElementById('sf-guest-vote').style.display = 'block';
-      document.getElementById('sf-guest-voted').style.display = 'none';
-      document.getElementById('sf-guest-result').style.display = 'none';
-      document.getElementById('sf-guest-stmt').textContent = stmt;
-    }
-  }
-}
-
-// ============================================================
-// HERD MENTALITY
-// ============================================================
-let myHerdAnswer = null;
-
-function showHerdHost() { showScreen('screen-herd-host'); }
-function showHerdGuest() { showScreen('screen-herd-guest'); }
-
-function herdTab(t) {
-  document.querySelectorAll('#screen-herd-host .tab').forEach((el,i) => el.classList.toggle('active', (i===0&&t==='ai')||(i===1&&t==='manual')||(i===2&&t==='file')));
-  document.getElementById('herd-ai-tab').style.display = t==='ai'?'block':'none';
-  document.getElementById('herd-manual-tab').style.display = t==='manual'?'block':'none';
-  document.getElementById('herd-file-tab').style.display = t==='file'?'block':'none';
-}
-
-let herdUploadedQueue = [];
-function handleHerdFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  parseUploadedFile(file, (rows) => {
-    herdUploadedQueue = rows.map(r => r.pregunta).filter(Boolean);
-    const previewEl = document.getElementById('herd-file-preview');
-    if (!herdUploadedQueue.length) {
-      previewEl.innerHTML = '<div class="text-sm">No se encontraron preguntas válidas. Verifica la columna "pregunta".</div>';
-      previewEl.style.display = 'block';
-      document.getElementById('herd-file-use-btn').style.display = 'none';
-      return;
-    }
-    previewEl.innerHTML = herdUploadedQueue.map((q,i) => `<div class="upload-preview-row">${i+1}. ${q}</div>`).join('');
-    previewEl.style.display = 'block';
-    document.getElementById('herd-file-use-btn').style.display = 'block';
-    document.getElementById('herd-file-use-btn').textContent = `Usar estas ${herdUploadedQueue.length} preguntas`;
-  }, () => alert('No se pudo leer el archivo. Verifica el formato.'));
-}
-
-async function useUploadedHerdQueue() {
-  if (!herdUploadedQueue.length) return;
-  const room = await getRoomData(state.roomCode);
-  room.gameState.herdFileQueue = herdUploadedQueue;
-  room.gameState.herdFileQueueIndex = 0;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  await sendHerdQ(herdUploadedQueue[0]);
-}
-
-function openProposeModal() { document.getElementById('herd-propose-form').style.display = 'block'; }
-function closeProposeModal() { document.getElementById('herd-propose-form').style.display = 'none'; document.getElementById('herd-propose-input').value = ''; }
-
-async function submitProposedQuestion() {
-  const q = document.getElementById('herd-propose-input').value.trim();
-  if (!q) return;
-  const room = await getRoomData(state.roomCode);
-  const queue = room.herdQueue || {};
-  const id = 'q' + Date.now();
-  queue[id] = { text: q, author: state.playerName };
-  await updateRoomData(state.roomCode, { herdQueue: queue });
-  closeProposeModal();
-  alert('¡Pregunta enviada al host!');
-}
-
-function renderHerdQueue(room) {
-  const queue = room.herdQueue || {};
-  const entries = Object.entries(queue);
-  document.getElementById('herd-queue-count').textContent = entries.length;
-  const listEl = document.getElementById('herd-queue-list');
-  if (!entries.length) { listEl.innerHTML = '<div class="text-sm text-center" style="padding:8px 0">Nadie ha propuesto preguntas todavía</div>'; return; }
-  listEl.innerHTML = entries.map(([id, item]) => `
-    <div class="queue-item">
-      <span>"${item.text}" — <span class="text-sm">${item.author}</span></span>
-      <div style="display:flex;gap:6px;">
-        <button class="btn btn-sm btn-primary" onclick="useQueuedQuestion('${id}')">Usar</button>
-        <button class="btn btn-sm" onclick="dismissQueuedQuestion('${id}')">✕</button>
-      </div>
-    </div>
-  `).join('');
-}
-
-async function useQueuedQuestion(id) {
-  const room = await getRoomData(state.roomCode);
-  const item = (room.herdQueue || {})[id];
-  if (!item) return;
-  delete room.herdQueue[id];
-  await updateRoomData(state.roomCode, { herdQueue: room.herdQueue });
-  await sendHerdQ(item.text);
-}
-
-async function dismissQueuedQuestion(id) {
-  const room = await getRoomData(state.roomCode);
-  if (!room.herdQueue) return;
-  delete room.herdQueue[id];
-  await updateRoomData(state.roomCode, { herdQueue: room.herdQueue });
-}
-
-async function generateHerdQ() {
-  const btn = document.getElementById('herd-gen-btn');
-  btn.textContent = 'Generando...'; btn.disabled = true;
-  try {
-    const res = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        max_tokens: 150,
-        messages: [{ role: 'user', content: 'Genera UNA pregunta divertida y fácil para el juego Herd Mentality (donde todos intentan responder lo mismo). Debe ser sobre temas familiares, comida, películas, o cultura popular. Debe tener respuestas posibles obvias. Responde SOLO con JSON: {"question":"¿pregunta aquí?"}' }]
-      })
-    });
-    const data = await res.json();
-    let text = data.content[0].text.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(text);
-    await sendHerdQ(parsed.question);
-  } catch(e) {
-    const qs = ["¿Cuál es el mejor día de la semana?","¿Cuál es el animal más popular como mascota?","¿Qué comida pides primero en una pizzería?","¿Cuál es el color favorito de los papás?","¿Qué película de acción es la más famosa?"];
-    await sendHerdQ(qs[Math.floor(Math.random()*qs.length)]);
-  }
-  btn.textContent = 'Generar pregunta'; btn.disabled = false;
-}
-
-async function sendManualHerd() {
-  const q = document.getElementById('herd-manual-q').value.trim();
-  if (!q) { alert('Escribe una pregunta'); return; }
-  await sendHerdQ(q);
-}
-
-async function sendHerdQ(question) {
-  myHerdAnswer = null;
-  const room = await getRoomData(state.roomCode);
-  room.gameState.herdQ = question;
-  room.gameState.herdAnswers = {};
-  room.gameState.herdRevealed = false;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  document.getElementById('herd-current').style.display = 'block';
-  document.getElementById('herd-results').style.display = 'none';
-  document.getElementById('herd-q-text').textContent = question;
-}
-
-function updateHerdCount(room) {
-  const ans = room.gameState.herdAnswers || {};
-  const total = room.players.length;
-  const count = Object.keys(ans).length;
-  document.getElementById('herd-ans-count').textContent = count;
-  document.getElementById('herd-ans-total').textContent = total;
-  document.getElementById('herd-progress').style.width = (total>0?count/total*100:0)+'%';
-}
-
-async function revealHerd() {
-  const room = await getRoomData(state.roomCode);
-  const answers = room.gameState.herdAnswers || {};
-  const normalized = {};
-  Object.entries(answers).forEach(([id, ans]) => { normalized[id] = ans.toLowerCase().trim(); });
-  const freq = {};
-  Object.values(normalized).forEach(a => freq[a] = (freq[a]||0)+1);
-  const maxFreq = Math.max(...Object.values(freq), 0);
-  const winAns = Object.entries(freq).filter(([,v])=>v===maxFreq).map(([k])=>k);
-  room.players.forEach(p => {
-    const myAns = normalized[p.id];
-    if (myAns && winAns.includes(myAns) && maxFreq > 1) {
-      room.gameState.scores = room.gameState.scores || {};
-      room.gameState.scores[p.id] = (room.gameState.scores[p.id]||0) + 1;
-    }
-  });
-  room.gameState.herdRevealed = true;
-  room.gameState.herdWinAnswers = winAns;
-  room.gameState.herdFreq = freq;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showHerdResultHost(room);
-}
-
-function showHerdResultHost(room) {
-  document.getElementById('herd-current').style.display = 'none';
-  document.getElementById('herd-results').style.display = 'block';
-  renderHerdAnswers(room, 'herd-answers-grid', 'herd-result-msg');
-  renderHerdScores(room, 'herd-host-scores');
-}
-
-function renderHerdAnswers(room, gridId, msgId) {
-  const answers = room.gameState.herdAnswers || {};
-  const winAns = room.gameState.herdWinAnswers || [];
-  const freq = room.gameState.herdFreq || {};
-  const maxFreq = Math.max(...Object.values(freq), 0);
-  let html = '';
-  room.players.forEach(p => {
-    const ans = answers[p.id] || '—';
-    const isWinner = winAns.includes(ans.toLowerCase().trim()) && maxFreq > 1;
-    html += `<div class="answer-card ${isWinner?'winner':'loser'}"><div class="answer-name">${p.name}</div><div class="answer-text">${ans}</div></div>`;
-  });
-  document.getElementById(gridId).innerHTML = html;
-  if (msgId) {
-    const msg = maxFreq > 1 ? `🎉 Respuesta ganadora: "${winAns[0]}" (${maxFreq} votos)` : '🐄 ¡Nadie coincidió! La vaca rosada busca dueño...';
-    document.getElementById(msgId).textContent = msg;
-  }
-}
-
-function renderHerdScores(room, tblId) {
-  const scores = room.gameState.scores || {};
-  const sorted = room.players.map(p => ({ name: p.name, score: scores[p.id] || 0 })).sort((a,b) => b.score - a.score);
-  document.getElementById(tblId).innerHTML = '<tr><th>Jugador</th><th>Pts</th></tr>' +
-    sorted.map((p,i) => `<tr><td class="${i===0?'rank-1':''}">${i===0?'🥇 ':''}${p.name}</td><td>${p.score}</td></tr>`).join('');
-}
-
-async function nextHerdRound() {
-  myHerdAnswer = null;
-  const room = await getRoomData(state.roomCode);
-  const queue = room.gameState.herdFileQueue;
-  document.getElementById('herd-current').style.display = 'none';
-  document.getElementById('herd-results').style.display = 'none';
-  if (queue && room.gameState.herdFileQueueIndex < queue.length - 1) {
-    room.gameState.herdFileQueueIndex++;
-    const next = queue[room.gameState.herdFileQueueIndex];
-    room.gameState.herdQ = null;
-    room.gameState.herdRevealed = false;
-    await updateRoomData(state.roomCode, { gameState: room.gameState });
-    await sendHerdQ(next);
-  } else {
-    room.gameState.herdQ = null;
-    room.gameState.herdRevealed = false;
-    await updateRoomData(state.roomCode, { gameState: room.gameState });
-  }
-}
-
-async function submitHerdAnswer() {
-  const ans = document.getElementById('herd-my-answer').value.trim();
-  if (!ans) { alert('Escribe tu respuesta'); return; }
-  myHerdAnswer = ans;
-  soundClick();
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.herdAnswers) room.gameState.herdAnswers = {};
-  room.gameState.herdAnswers[state.playerName] = ans;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  document.getElementById('herd-guest-answer').style.display = 'none';
-  document.getElementById('herd-guest-answered').style.display = 'block';
-}
-
-function updateHerdUI(room) {
-  if (state.isHost) {
-    updateHerdCount(room);
-    renderHerdQueue(room);
-    if (room.gameState.herdRevealed) showHerdResultHost(room);
-  } else {
-    const q = room.gameState.herdQ;
-    if (!q) {
-      document.getElementById('herd-guest-wait').style.display = 'block';
-      document.getElementById('herd-guest-answer').style.display = 'none';
-      document.getElementById('herd-guest-answered').style.display = 'none';
-      document.getElementById('herd-guest-result').style.display = 'none';
-      myHerdAnswer = null;
-    } else if (room.gameState.herdRevealed) {
-      document.getElementById('herd-guest-wait').style.display = 'none';
-      document.getElementById('herd-guest-answer').style.display = 'none';
-      document.getElementById('herd-guest-answered').style.display = 'none';
-      document.getElementById('herd-guest-result').style.display = 'block';
-      renderHerdAnswers(room, 'herd-guest-answers-grid', 'herd-guest-result-msg');
-      renderHerdScores(room, 'herd-guest-scores');
-    } else if (!myHerdAnswer) {
-      document.getElementById('herd-guest-wait').style.display = 'none';
-      document.getElementById('herd-guest-answer').style.display = 'block';
-      document.getElementById('herd-guest-answered').style.display = 'none';
-      document.getElementById('herd-guest-result').style.display = 'none';
-      document.getElementById('herd-guest-q').textContent = q;
-      document.getElementById('herd-my-answer').value = '';
-    }
-  }
-}
-
-// ============================================================
-// TERMINAR RONDA GENÉRICO (Sound Fishy / Herd / HMP) -> guarda historial y vuelve al lobby
-// ============================================================
-async function finishGenericRound(game) {
-  const room = await getRoomData(state.roomCode);
-  const scores = room.gameState.scores || {};
-  const summaries = { soundfishy: 'Verdad o mentira', herd: 'Mayoría manda', hmp: 'El Hermano Más Probable' };
-  const summary = summaries[game] || game;
-  await addRoundScoresToTotal(scores);
-  await addToHistory(game, summary, scores);
-  soundWin();
-  launchConfetti();
-  await backToLobby();
-}
-
-// ============================================================
-// CARGA DE ARCHIVOS (CSV / XLSX / JSON) — utilidades genéricas
-// ============================================================
-function parseUploadedFile(file, onSuccess, onError) {
-  const reader = new FileReader();
-  const ext = file.name.split('.').pop().toLowerCase();
-  reader.onload = (e) => {
-    try {
-      let rows = [];
-      if (ext === 'json') {
-        const data = JSON.parse(e.target.result);
-        rows = Array.isArray(data) ? data : (data.rows || data.preguntas || []);
-        // Normalize: if array of strings, wrap as {pregunta: str}
-        rows = rows.map(r => typeof r === 'string' ? { pregunta: r } : r);
-      } else {
-        // csv or xlsx via SheetJS
-        const wb = ext === 'csv'
-          ? XLSX.read(e.target.result, { type: 'string' })
-          : XLSX.read(e.target.result, { type: 'array' });
-        const sheet = wb.Sheets[wb.SheetNames[0]];
-        rows = XLSX.utils.sheet_to_json(sheet, { defval: '' });
-      }
-      // Normalize keys to lowercase without accents for robust matching
-      rows = rows.map(r => {
-        const norm = {};
-        Object.entries(r).forEach(([k,v]) => {
-          const key = k.toString().toLowerCase().trim()
-            .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u');
-          norm[key] = typeof v === 'string' ? v.trim() : v;
-        });
-        return norm;
-      });
-      onSuccess(rows);
-    } catch (err) {
-      console.error('Error parsing file:', err);
-      onError(err);
-    }
-  };
-  reader.onerror = () => onError(new Error('No se pudo leer el archivo'));
-  if (ext === 'csv') reader.readAsText(file);
-  else if (ext === 'json') reader.readAsText(file);
-  else reader.readAsArrayBuffer(file);
-}
-
-function genericFileTab(prefix, tabName, total) {
-  // Toggles tabs for any *-setup screen with ai/manual/file tabs
-  document.querySelectorAll(`#screen-${prefix} .tab`).forEach((el, i) => {
-    const names = ['ai','manual','file'].slice(0, total);
-    el.classList.toggle('active', names[i] === tabName);
-  });
-}
-
-// ============================================================
-// EL HERMANO MÁS PROBABLE (HMP)
-// ============================================================
-let myHMPRole = null; // 'hijo' | 'guess'
-let hmpUploadedQueue = [];
-let hmpMyVoteSubmitted = false;
-let hmpMyGuessSubmitted = false;
-
-function goToHMPRoleSelect() {
-  myHMPRole = null;
-  document.getElementById('hmp-role-card-hijo').classList.remove('selected');
-  document.getElementById('hmp-role-card-guess').classList.remove('selected');
-  startGame('hmp');
-  showScreen('screen-hmp-role');
-}
-
-async function selectHMPRole(role) {
-  myHMPRole = role;
-  document.getElementById('hmp-role-card-hijo').classList.toggle('selected', role==='hijo');
-  document.getElementById('hmp-role-card-guess').classList.toggle('selected', role==='guess');
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.hmpRoles) room.gameState.hmpRoles = {};
-  room.gameState.hmpRoles[state.playerName] = role;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  soundClick();
-  renderHMPRoleList(room, true);
-}
-
-function renderHMPRoleList(room, refetchNeeded) {
-  if (refetchNeeded) { getRoomData(state.roomCode).then(r => renderHMPRoleListInner(r)); return; }
-  renderHMPRoleListInner(room);
-}
-
-function renderHMPRoleListInner(room) {
-  const roles = room.gameState.hmpRoles || {};
-  document.getElementById('hmp-role-count').textContent = Object.keys(roles).length;
-  const icons = { hijo: '🙋', guess: '🤔' };
-  document.getElementById('hmp-role-list').innerHTML = room.players.map(p => {
-    const r = roles[p.id];
-    return `<div class="player-item"><div class="player-avatar ${p.color}">${p.name.charAt(0).toUpperCase()}</div><span>${p.name}</span><span class="text-sm" style="margin-left:auto;">${r ? icons[r] + ' ' + (r==='hijo'?'Hijo/a':'Adivina') : 'Eligiendo...'}</span></div>`;
-  }).join('');
-  if (state.isHost) {
-    const hijoCount = Object.values(roles).filter(r => r === 'hijo').length;
-    document.getElementById('hmp-host-start-area').style.display = hijoCount >= 2 ? 'block' : 'none';
-    if (hijoCount < 2) {
-      document.getElementById('hmp-host-start-area').insertAdjacentHTML('afterend', '');
-    }
-  } else {
-    document.getElementById('hmp-guest-wait-roles').style.display = 'block';
-  }
-}
-
-function goToHMPSetup() {
-  showScreen('screen-hmp-setup');
-}
-
-function hmpSetupTab(t) { genericFileTab('hmp-setup', t, 3); 
-  document.getElementById('hmp-setup-ai-tab').style.display = t==='ai' ? 'block':'none';
-  document.getElementById('hmp-setup-manual-tab').style.display = t==='manual' ? 'block':'none';
-  document.getElementById('hmp-setup-file-tab').style.display = t==='file' ? 'block':'none';
-}
-
-async function generateHMPQuestion() {
-  const btn = document.getElementById('hmp-gen-btn');
-  btn.textContent = 'Generando...'; btn.disabled = true;
-  try {
-    const res = await fetch('/api/claude', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        max_tokens: 150,
-        messages: [{ role: 'user', content: 'Genera UNA pregunta divertida tipo "¿Quién de los hermanos es más probable que...?" para usar entre hermanos en una reunión familiar (ej: quejarse de no dormir bien, tardar más en arreglarse, llegar tarde, comer más rápido, perder las llaves). Responde SOLO con JSON: {"question":"¿Quién es más probable que...?"}' }]
-      })
-    });
-    const data = await res.json();
-    let text = data.content[0].text.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(text);
-    await sendHMPQuestion(parsed.question);
-  } catch(e) {
-    const qs = ["¿Quién es más probable que se queje de no dormir bien?", "¿Quién es más probable que llegue tarde a todo?", "¿Quién es más probable que coma más rápido?", "¿Quién es más probable que pierda las llaves?", "¿Quién es más probable que se ría primero en una broma?"];
-    await sendHMPQuestion(qs[Math.floor(Math.random()*qs.length)]);
-  }
-  btn.textContent = '✨ Generar pregunta'; btn.disabled = false;
-}
-
-async function sendManualHMP() {
-  const q = document.getElementById('hmp-manual-q').value.trim();
-  if (!q) { alert('Escribe una pregunta'); return; }
-  await sendHMPQuestion(q);
-}
-
-function handleHMPFileUpload(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  parseUploadedFile(file, (rows) => {
-    hmpUploadedQueue = rows.map(r => r.pregunta).filter(Boolean);
-    const previewEl = document.getElementById('hmp-file-preview');
-    if (!hmpUploadedQueue.length) {
-      previewEl.innerHTML = '<div class="text-sm">No se encontraron preguntas válidas. Verifica que el archivo tenga una columna "pregunta".</div>';
-      previewEl.style.display = 'block';
-      document.getElementById('hmp-file-use-btn').style.display = 'none';
-      return;
-    }
-    previewEl.innerHTML = hmpUploadedQueue.map((q,i) => `<div class="upload-preview-row">${i+1}. ${q}</div>`).join('');
-    previewEl.style.display = 'block';
-    document.getElementById('hmp-file-use-btn').style.display = 'block';
-    document.getElementById('hmp-file-use-btn').textContent = `Usar estas ${hmpUploadedQueue.length} preguntas`;
-  }, (err) => {
-    alert('No se pudo leer el archivo. Verifica el formato.');
-  });
-}
-
-async function useUploadedHMPQueue() {
-  if (!hmpUploadedQueue.length) return;
-  const room = await getRoomData(state.roomCode);
-  room.gameState.hmpFileQueue = hmpUploadedQueue;
-  room.gameState.hmpFileQueueIndex = 0;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  await sendHMPQuestion(hmpUploadedQueue[0]);
-}
-
-async function sendHMPQuestion(question) {
-  hmpMyVoteSubmitted = false; hmpMyGuessSubmitted = false;
-  const room = await getRoomData(state.roomCode);
-  const roles = room.gameState.hmpRoles || {};
-  const hijos = room.players.filter(p => roles[p.id] === 'hijo');
-  room.gameState.hmp = {
-    phase: 'voting', // voting -> guessing -> result
-    question,
-    hijoIds: hijos.map(p => p.id),
-    votes: {}, guesses: {}
-  };
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showHMPHostVoting(room);
-}
-
-function showHMPHostVoting(room) {
-  showScreen('screen-hmp-host-voting');
-  document.getElementById('hmp-host-question').textContent = room.gameState.hmp.question;
-  renderHMPHostVotingList(room);
-}
-
-function renderHMPHostVotingList(room) {
-  const hmp = room.gameState.hmp;
-  if (!hmp) return;
-  const votes = hmp.votes || {};
-  const hijos = room.players.filter(p => hmp.hijoIds.includes(p.id));
-  document.getElementById('hmp-votes-count').textContent = Object.keys(votes).length;
-  document.getElementById('hmp-votes-total').textContent = hijos.length;
-  document.getElementById('hmp-host-voting-list').innerHTML = hijos.map(p => {
-    const voted = votes[p.id] !== undefined;
-    return `<div class="player-item"><div class="player-avatar ${p.color}">${p.name.charAt(0).toUpperCase()}</div><span>${p.name}</span><span class="text-sm" style="margin-left:auto;">${voted ? '✅ Votó' : '🤔 Pensando...'}</span></div>`;
-  }).join('');
-}
-
-async function revealHMPVotes() {
-  const room = await getRoomData(state.roomCode);
-  room.gameState.hmp.phase = 'guessing';
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showHMPHostGuessing(room);
-}
-
-function showHMPHostGuessing(room) {
-  showScreen('screen-hmp-host-guessing');
-  document.getElementById('hmp-host-guess-question').textContent = room.gameState.hmp.question;
-  renderHMPGuessProgress(room);
-}
-
-function renderHMPGuessProgress(room) {
-  const hmp = room.gameState.hmp;
-  const guessers = room.players.filter(p => !hmp.hijoIds.includes(p.id));
-  const guesses = hmp.guesses || {};
-  const count = Object.keys(guesses).length;
-  document.getElementById('hmp-guess-count').textContent = count;
-  document.getElementById('hmp-guess-total').textContent = guessers.length;
-  document.getElementById('hmp-guess-progress').style.width = (guessers.length>0?count/guessers.length*100:0)+'%';
-}
-
-function computeHMPTally(room) {
-  const hmp = room.gameState.hmp;
-  const votes = hmp.votes || {};
-  const tally = {};
-  Object.values(votes).forEach(v => { tally[v] = (tally[v]||0) + 1; });
-  const maxVotes = Math.max(...Object.values(tally), 0);
-  const winners = Object.entries(tally).filter(([,v]) => v === maxVotes).map(([id]) => id);
-  // Tie among all hijos (each got exactly 1 vote, more than 1 hijo) => no winner
-  const isFullTie = hmp.hijoIds.length > 1 && maxVotes <= 1 && winners.length === hmp.hijoIds.length;
-  return { tally, maxVotes, winners: isFullTie ? [] : winners, isFullTie };
-}
-
-async function revealHMPFinal() {
-  const room = await getRoomData(state.roomCode);
-  const hmp = room.gameState.hmp;
-  const { winners } = computeHMPTally(room);
-  const guesses = hmp.guesses || {};
-  const guessers = room.players.filter(p => !hmp.hijoIds.includes(p.id));
-  room.gameState.scores = room.gameState.scores || {};
-  let allCorrect = guessers.length > 0;
-  guessers.forEach(p => {
-    const g = guesses[p.id];
-    const correct = winners.length > 0 && g && winners.includes(g);
-    if (correct) { room.gameState.scores[p.id] = (room.gameState.scores[p.id]||0) + 1; }
-    else { allCorrect = false; }
-  });
-  hmp.phase = 'result';
-  hmp.perfect = allCorrect;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  soundWin();
-  if (allCorrect) launchConfetti();
-  showHMPHostResult(room);
-}
-
-function showHMPHostResult(room) {
-  showScreen('screen-hmp-host-result');
-  renderHMPResultCommon(room, 'hmp-result-question', 'hmp-result-tally', 'hmp-result-guesses', 'hmp-perfect-banner', 'hmp-host-scores');
-}
-
-function renderHMPResultCommon(room, qId, tallyId, guessesId, bannerId, scoresId) {
-  const hmp = room.gameState.hmp;
-  if (!hmp) return;
-  document.getElementById(qId).textContent = hmp.question;
-  const { tally, maxVotes, winners } = computeHMPTally(room);
-  const hijos = room.players.filter(p => hmp.hijoIds.includes(p.id));
-
-  document.getElementById(tallyId).innerHTML = hijos.map(p => {
-    const v = tally[p.id] || 0;
-    const pct = maxVotes > 0 ? (v/Math.max(...Object.values(tally),1)*100) : 0;
-    const isWinner = winners.includes(p.id);
-    return `<div class="hmp-tally-bar-wrap">
-      <div class="hmp-tally-label"><span>${isWinner?'🏆 ':''}${p.name}</span><span>${v} voto${v===1?'':'s'}</span></div>
-      <div class="hmp-tally-bar-bg"><div class="hmp-tally-bar-fill ${isWinner?'winner':''}" style="width:${pct}%"></div></div>
-    </div>`;
-  }).join('') + (winners.length === 0 ? '<div class="text-sm text-center mt1">🤷 Empate total entre hermanos — ronda sin ganador claro</div>' : '');
-
-  const guessers = room.players.filter(p => !hmp.hijoIds.includes(p.id));
-  const guesses = hmp.guesses || {};
-  document.getElementById(guessesId).innerHTML = guessers.map(p => {
-    const g = guesses[p.id];
-    const gName = g ? (room.players.find(pp=>pp.id===g)?.name || g) : '(sin respuesta)';
-    const correct = winners.length > 0 && g && winners.includes(g);
-    return `<div class="hmp-guess-row ${g ? (correct?'correct':'wrong') : ''}"><span>${p.name} dijo: <b>${gName}</b></span><span>${correct?'✅ +1':(g?'❌':'—')}</span></div>`;
-  }).join('') || '<div class="text-sm text-center">Nadie tuvo que adivinar esta vez</div>';
-
-  document.getElementById(bannerId).style.display = hmp.perfect ? 'block' : 'none';
-
-  const scores = room.gameState.scores || {};
-  const sorted = room.players.map(p => ({ name: p.name, score: scores[p.id] || 0 })).sort((a,b) => b.score - a.score);
-  const tbl = document.getElementById(scoresId);
-  if (tbl) tbl.innerHTML = '<tr><th>Jugador</th><th>Pts</th></tr>' +
-    sorted.map((p,i) => `<tr><td class="${i===0?'rank-1':''}">${i===0?'🥇 ':''}${p.name}</td><td>${p.score}</td></tr>`).join('');
-}
-
-async function nextHMPRound() {
-  const room = await getRoomData(state.roomCode);
-  // If there's an uploaded file queue, auto-advance to next question in it
-  if (room.gameState.hmpFileQueue && room.gameState.hmpFileQueueIndex < room.gameState.hmpFileQueue.length - 1) {
-    room.gameState.hmpFileQueueIndex++;
-    const nextQ = room.gameState.hmpFileQueue[room.gameState.hmpFileQueueIndex];
-    await updateRoomData(state.roomCode, { gameState: room.gameState });
-    await sendHMPQuestion(nextQ);
-  } else {
-    room.gameState.hmp = null;
-    await updateRoomData(state.roomCode, { gameState: room.gameState });
-    showScreen('screen-hmp-setup');
-  }
-}
-
-// ---- Guest side ----
-async function castHMPVote(targetId) {
-  if (hmpMyVoteSubmitted) return;
-  hmpMyVoteSubmitted = true;
-  soundClick();
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.hmp.votes) room.gameState.hmp.votes = {};
-  room.gameState.hmp.votes[state.playerName] = targetId;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showScreen('screen-hmp-guest-voted');
-}
-
-async function castHMPGuess(targetId) {
-  if (hmpMyGuessSubmitted) return;
-  hmpMyGuessSubmitted = true;
-  soundClick();
-  const room = await getRoomData(state.roomCode);
-  if (!room.gameState.hmp.guesses) room.gameState.hmp.guesses = {};
-  room.gameState.hmp.guesses[state.playerName] = targetId;
-  await updateRoomData(state.roomCode, { gameState: room.gameState });
-  showScreen('screen-hmp-guest-waiting-result');
-}
-
-function renderHMPVoteOptions(containerId, room, onSelectFn) {
-  const hmp = room.gameState.hmp;
-  const hijos = room.players.filter(p => hmp.hijoIds.includes(p.id));
-  document.getElementById(containerId).innerHTML = hijos.map(p =>
-    `<div class="hmp-vote-option" onclick="${onSelectFn}('${p.id}')">${p.name}</div>`
-  ).join('');
-}
-
-function updateHMPGuestUI(room) {
-  const hmp = room.gameState.hmp;
-  const roles = room.gameState.hmpRoles || {};
-  const myRole = roles[state.playerName];
-  const currentScreen = document.querySelector('.screen.active').id;
-
-  // Role selection phase (no hmp question active yet, host hasn't moved past role screen)
-  if (!hmp && currentScreen !== 'screen-hmp-setup') {
-    if (currentScreen !== 'screen-hmp-role') { showScreen('screen-hmp-role'); }
-    renderHMPRoleListInner(room);
-    return;
-  }
-  if (!hmp) return; // host still on setup picking question source
-
-  const amHijo = hmp.hijoIds.includes(state.playerName);
-
-  if (hmp.phase === 'voting') {
-    if (amHijo) {
-      const alreadyVoted = hmp.votes && hmp.votes[state.playerName] !== undefined;
-      if (alreadyVoted) { hmpMyVoteSubmitted = true; if (currentScreen !== 'screen-hmp-guest-voted') showScreen('screen-hmp-guest-voted'); }
-      else {
-        hmpMyVoteSubmitted = false;
-        if (currentScreen !== 'screen-hmp-guest-voting') {
-          showScreen('screen-hmp-guest-voting');
-          document.getElementById('hmp-guest-vote-question').textContent = hmp.question;
-          renderHMPVoteOptions('hmp-guest-vote-options', room, 'castHMPVote');
-        }
-      }
-    } else {
-      if (currentScreen !== 'screen-hmp-guest-waiting-result') showScreen('screen-hmp-guest-waiting-result');
-    }
-  } else if (hmp.phase === 'guessing') {
-    if (amHijo) {
-      if (currentScreen !== 'screen-hmp-guest-waiting-result') showScreen('screen-hmp-guest-waiting-result');
-    } else {
-      const alreadyGuessed = hmp.guesses && hmp.guesses[state.playerName] !== undefined;
-      if (alreadyGuessed) { hmpMyGuessSubmitted = true; if (currentScreen !== 'screen-hmp-guest-waiting-result') showScreen('screen-hmp-guest-waiting-result'); }
-      else {
-        hmpMyGuessSubmitted = false;
-        if (currentScreen !== 'screen-hmp-guest-guessing') {
-          showScreen('screen-hmp-guest-guessing');
-          document.getElementById('hmp-guest-guess-question').textContent = hmp.question;
-          renderHMPVoteOptions('hmp-guest-guess-options', room, 'castHMPGuess');
-        }
-      }
-    }
-  } else if (hmp.phase === 'result') {
-    if (currentScreen !== 'screen-hmp-guest-result') {
-      showScreen('screen-hmp-guest-result');
-    }
-    renderHMPResultCommon(room, 'hmp-guest-result-question', 'hmp-guest-result-tally', 'hmp-guest-result-guesses', 'hmp-guest-perfect-banner', 'hmp-guest-scores');
-  }
-}
-</script>
+<!-- ===== FIREBASE (módulo, debe cargar primero) ===== -->
+<script type="module" src="js/firebase-init.js"></script>
+
+<!-- ===== LÓGICA DE LA APP, EN ORDEN DE DEPENDENCIA ===== -->
+<script src="js/core.js"></script>
+<script src="js/file-upload.js"></script>
+<script src="js/game-jeopardy.js"></script>
+<script src="js/game-soundfishy.js"></script>
+<script src="js/game-herd.js"></script>
+<script src="js/game-hmp.js"></script>
+<script src="js/game-photos.js"></script>
+<script src="js/help-modal.js"></script>
 </body>
 </html>
