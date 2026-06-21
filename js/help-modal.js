@@ -2,6 +2,34 @@
 // MODAL DE AYUDA: "¿Cómo se juega?" — contenido por juego
 // ============================================================
 const HELP_CONTENT = {
+  wavelength: {
+    title: '📡 Wavelength — Cómo se juega',
+    html: `
+      <div class="help-section-label">El objetivo</div>
+      <p style="font-size:14px;">2 equipos compiten leyendo la mente de su propio psíquico para encontrar un número secreto del 1 al 20 en una escala imaginaria.</p>
+
+      <div class="help-section-label">Cómo se juega</div>
+      <ul class="help-step-list">
+        <li class="help-step"><span class="help-step-num">1</span><span>Se forman 2 equipos (al azar o cada uno elige). Dentro de cada equipo, el rol de psíquico va rotando turno a turno.</span></li>
+        <li class="help-step"><span class="help-step-num">2</span><span>Aparece una categoría corta (ej: "Picante", "Fama", "Utilidad"). El psíquico del equipo en turno ve un número secreto del 1 al 20 — el resto de su equipo no lo ve.</span></li>
+        <li class="help-step"><span class="help-step-num">3</span><span>El psíquico escribe una pista relacionada con ese punto de la escala.</span></li>
+        <li class="help-step"><span class="help-step-num">4</span><span>Todo el equipo (psíquico incluido) mueve juntos un medidor compartido hasta acordar en qué punto creen que está el número, y confirman.</span></li>
+        <li class="help-step"><span class="help-step-num">5</span><span>El equipo contrario, viendo dónde quedó el medidor (pero no el número real), adivina si creen que el número está a la izquierda o a la derecha.</span></li>
+        <li class="help-step"><span class="help-step-num">6</span><span>Se revela el número real y se reparten los puntos.</span></li>
+      </ul>
+
+      <div class="help-section-label">Cómo se calculan los puntos</div>
+      <table class="help-points-table">
+        <tr><td>Equipo en turno: acertó exacto (distancia 0)</td><td>+4</td></tr>
+        <tr><td>Equipo en turno: distancia de 1</td><td>+3</td></tr>
+        <tr><td>Equipo en turno: distancia de 2</td><td>+2</td></tr>
+        <tr><td>Equipo en turno: distancia de 3 o 4</td><td>+1</td></tr>
+        <tr><td>Equipo en turno: distancia de 5 o más</td><td>0</td></tr>
+        <tr><td>Equipo contrario: adivinó correctamente izquierda/derecha</td><td>+1</td></tr>
+      </table>
+      <div class="help-tip">💡 El equipo que empieza arranca con 0 puntos; el otro arranca con 1 (ventaja por jugar segundo). El primer equipo en llegar a 10 puntos gana.</div>
+    `
+  },
   jeopardy: {
     title: '📺 Jeopardy — Cómo se juega',
     html: `

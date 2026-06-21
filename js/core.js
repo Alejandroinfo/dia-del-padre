@@ -319,7 +319,7 @@ function startListening() {
     if (!room) return;
     updateLobbyUI(room);
     renderGlobalScoreBars(room);
-    if (room.game && !state.isHost) { handleGameChange(room); }
+    if (room.game && (!state.isHost || room.game === 'wavelength')) { handleGameChange(room); }
     if (room.game) { updateGameUI(room); }
     const currentScreen = document.querySelector('.screen.active').id;
     if (currentScreen === 'screen-photo-setup') { renderPhotoQueueCountFromRoom(room); }
@@ -365,6 +365,7 @@ function handleGameChange(room) {
   else if (room.game === 'herd' && currentScreen !== 'screen-herd-guest') showHerdGuest();
   else if (room.game === 'hmp' && !hmpScreens.includes(currentScreen)) { showScreen('screen-hmp-role'); }
   else if (room.game === 'photos' && currentScreen !== 'screen-photo-guest') { myPhotoAnswered = -1; showPhotoGuest(); }
+  else if (room.game === 'wavelength') { handleGameChangeWavelength(room); }
 }
 
 function updateGameUI(room) {
@@ -401,6 +402,8 @@ function updateGameUI(room) {
       const currentScreen = document.querySelector('.screen.active').id;
       if (currentScreen === 'screen-photo-host') renderPhotoAnswersList(room);
     }
+  } else if (room.game === 'wavelength') {
+    updateGameUIWavelength(room);
   }
 }
 

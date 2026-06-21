@@ -45,6 +45,10 @@
         <div class="game-icon">📸</div>
         <div><div class="game-title">Galería de Recuerdos</div><div class="game-desc">Fotos de papá con preguntas — ¿quién sabe más?</div></div>
       </div>
+      <div class="game-card" style="cursor:default;">
+        <div class="game-icon">📡</div>
+        <div><div class="game-title">Wavelength</div><div class="game-desc">2 equipos, una escala del 1 al 20 y mucha intuición</div></div>
+      </div>
     </div>
   </div>
 </div>
@@ -119,6 +123,10 @@
       <div class="game-card" onclick="goToPhotoSetup()">
         <div class="game-icon">📸</div>
         <div><div class="game-title">Galería de Recuerdos</div><div class="game-desc">Sube fotos de papá, todos adivinan</div></div>
+      </div>
+      <div class="game-card" onclick="goToWavelengthTeamSetup()">
+        <div class="game-icon">📡</div>
+        <div><div class="game-title">Wavelength</div><div class="game-desc">2 equipos compiten leyendo la mente del psíquico</div></div>
       </div>
       <div class="divider"></div>
       <button class="btn" onclick="showHistory()">📊 Ver historial de partidas</button>
@@ -955,6 +963,176 @@
   </div>
 </div>
 
+<!-- ===== PANTALLA: WAVELENGTH — SETUP DE EQUIPOS (HOST) ===== -->
+<div class="screen" id="screen-wl-team-setup">
+  <div class="topbar">
+    <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
+    <span class="topbar-title">📡 Wavelength — Equipos</span>
+    <button class="help-btn" onclick="openHelpModal('wavelength')">?</button>
+  </div>
+  <div class="px125 pb2">
+    <div class="section-label">¿CÓMO SE FORMAN LOS EQUIPOS?</div>
+    <button class="btn btn-primary" onclick="setupWavelengthTeams('random')">🎲 Al azar</button>
+    <button class="btn" onclick="setupWavelengthTeams('choice')">🙋 Que cada uno elija su equipo</button>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — ELEGIR EQUIPO (TODOS) ===== -->
+<div class="screen" id="screen-wl-team-choice">
+  <div class="topbar">
+    <span></span>
+    <span class="topbar-title">📡 Elige tu equipo</span>
+    <button class="help-btn" onclick="openHelpModal('wavelength')">?</button>
+  </div>
+  <div class="px125 pb2">
+    <div class="wl-team-card team-a" onclick="chooseWavelengthTeam('A')">
+      <div class="wl-team-name wl-team-a-label">🔵 Equipo Azul</div>
+      <div id="wl-team-a-members" class="text-sm"></div>
+    </div>
+    <div class="wl-team-card team-b" onclick="chooseWavelengthTeam('B')">
+      <div class="wl-team-name wl-team-b-label">🔴 Equipo Rojo</div>
+      <div id="wl-team-b-members" class="text-sm"></div>
+    </div>
+    <div class="divider"></div>
+    <div id="wl-host-start-area" style="display:none;">
+      <button class="btn btn-primary" onclick="startWavelengthGame()">🏁 Empezar partida</button>
+    </div>
+    <div id="wl-guest-wait-teams" class="text-center text-sm p1" style="display:none;"><span class="spinner"></span>Esperando que el host inicie la partida...</div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — FUENTE DE CATEGORÍAS (HOST) ===== -->
+<div class="screen" id="screen-wl-category-setup">
+  <div class="topbar">
+    <span></span>
+    <span class="topbar-title">📡 Elegir categoría</span>
+    <button class="help-btn" onclick="openHelpModal('wavelength')">?</button>
+  </div>
+  <div class="px125 pb2">
+    <div class="wl-score-row" id="wl-setup-score-row"></div>
+    <div class="text-sm text-center mb1">Turno de: <b id="wl-setup-turn-team"></b> — Psíquico: <b id="wl-setup-psychic-name"></b></div>
+    <div class="tabs">
+      <div class="tab active" onclick="wlTab('ai')">IA genera</div>
+      <div class="tab" onclick="wlTab('manual')">Manual</div>
+      <div class="tab" onclick="wlTab('file')">📁 Archivo</div>
+    </div>
+    <div id="wl-ai-tab">
+      <div class="text-sm mb1">La IA generará una categoría corta tipo "Utilidad", "Picante" o "Fama".</div>
+      <button class="btn btn-primary" onclick="generateWLCategory()" id="wl-gen-btn">✨ Generar categoría</button>
+    </div>
+    <div id="wl-manual-tab" style="display:none;">
+      <div class="section-label">CATEGORÍA</div>
+      <input type="text" id="wl-manual-cat" placeholder="Ej: Picante, Utilidad, Fama...">
+      <button class="btn btn-primary" onclick="useManualWLCategory()">Usar esta categoría</button>
+    </div>
+    <div id="wl-file-tab" style="display:none;">
+      <div class="upload-format-hint">Columna: <code>categoria</code><br>Acepta <code>.csv</code>, <code>.xlsx</code> o <code>.json</code></div>
+      <div class="upload-zone" onclick="document.getElementById('wl-file-input').click()">
+        <div class="upload-zone-icon">📁</div>
+        <div class="upload-zone-text">Toca para subir tu archivo</div>
+      </div>
+      <input type="file" id="wl-file-input" accept=".csv,.xlsx,.xls,.json" style="display:none;" onchange="handleWLFileUpload(event)">
+      <div id="wl-sheet-picker" style="display:none;"></div>
+      <div id="wl-file-preview" class="upload-preview" style="display:none;"></div>
+      <button class="btn btn-primary" id="wl-file-use-btn" style="display:none;" onclick="useUploadedWLQueue()">Usar estas categorías</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — PSÍQUICO (ve el número) ===== -->
+<div class="screen" id="screen-wl-psychic">
+  <div class="topbar"><span></span><span class="topbar-title">📡 Tú eres el psíquico</span><button class="help-btn" onclick="openHelpModal('wavelength')">?</button></div>
+  <div class="px125 pb2">
+    <div class="wl-category-banner">
+      <div class="wl-category-name" id="wl-psychic-cat-name"></div>
+    </div>
+    <div class="text-center text-sm">El número secreto es:</div>
+    <div class="wl-psychic-number" id="wl-psychic-number-display"></div>
+    <div id="wl-psychic-clue-form">
+      <div class="section-label">ESCRIBE UNA PISTA PARA TU EQUIPO</div>
+      <input type="text" id="wl-clue-input" placeholder="Ej: Tacos al pastor" maxlength="80">
+      <button class="btn btn-primary" onclick="submitWLClue()">Enviar pista a mi equipo</button>
+    </div>
+    <div id="wl-psychic-clue-sent" style="display:none;" class="text-center text-sm p1">
+      ✅ Pista enviada. Tu equipo está moviendo el medidor — ¡tú también puedes ayudar a mover!
+    </div>
+    <div id="wl-psychic-slider-area" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — EQUIPO EN TURNO MOVIENDO EL SLIDER ===== -->
+<div class="screen" id="screen-wl-team-slider">
+  <div class="topbar"><span></span><span class="topbar-title">📡 Encuentren el número</span><button class="help-btn" onclick="openHelpModal('wavelength')">?</button></div>
+  <div class="px125 pb2">
+    <div class="wl-category-banner">
+      <div class="wl-category-name" id="wl-team-cat-name"></div>
+    </div>
+    <div class="text-center mb1"><span class="section-label">PISTA DEL PSÍQUICO</span><div style="font-size:18px;font-weight:700;" id="wl-team-clue-display"></div></div>
+    <div id="wl-slider-container"></div>
+    <div class="wl-confirm-btn-wrap">
+      <button class="btn btn-primary" onclick="confirmWLSliderValue()">✅ Confirmar este valor</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — EQUIPO CONTRARIO ESPERANDO ===== -->
+<div class="screen" id="screen-wl-other-team-wait">
+  <div class="topbar"><span></span><span class="topbar-title">📡 Wavelength</span><button class="help-btn" onclick="openHelpModal('wavelength')">?</button></div>
+  <div class="px125 pb2 text-center">
+    <div style="font-size:40px;margin:1rem 0;">🤔</div>
+    <div class="text-sm">El otro equipo está pensando su pista y moviendo el medidor...</div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — EQUIPO CONTRARIO ADIVINA IZQ/DER ===== -->
+<div class="screen" id="screen-wl-guess-side">
+  <div class="topbar"><span></span><span class="topbar-title">📡 ¿Izquierda o derecha?</span><button class="help-btn" onclick="openHelpModal('wavelength')">?</button></div>
+  <div class="px125 pb2">
+    <div class="text-sm text-center mb1">El otro equipo confirmó su valor. ¿Creen que el número real está a la izquierda o a la derecha de ese punto?</div>
+    <div id="wl-guess-slider-display"></div>
+    <div class="wl-guess-lr-btns">
+      <button class="wl-lr-btn" onclick="submitWLSideGuess('left')">⬅️ Izquierda</button>
+      <button class="wl-lr-btn" onclick="submitWLSideGuess('right')">Derecha ➡️</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — REVELACIÓN (HOST controla, todos ven) ===== -->
+<div class="screen" id="screen-wl-reveal">
+  <div class="topbar">
+    <span></span>
+    <span class="topbar-title">📡 Revelación</span>
+    <button class="help-btn" onclick="openHelpModal('wavelength')">?</button>
+  </div>
+  <div class="px125 pb2">
+    <div class="wl-result-reveal">
+      <div class="text-sm">El número secreto era:</div>
+      <div class="wl-result-number" id="wl-reveal-number"></div>
+    </div>
+    <div id="wl-reveal-slider-display"></div>
+    <div class="wl-points-breakdown" id="wl-points-breakdown"></div>
+    <button class="btn btn-primary" id="wl-host-next-btn" style="display:none;" onclick="nextWLTurn()">Siguiente turno</button>
+    <div class="text-center text-sm p1" id="wl-guest-wait-next" style="display:none;"><span class="spinner"></span>Esperando que el host continúe...</div>
+  </div>
+</div>
+
+<!-- ===== PANTALLA: WAVELENGTH — FIN DEL JUEGO ===== -->
+<div class="screen" id="screen-wl-winner">
+  <div class="topbar">
+    <span class="topbar-back" onclick="backToLobby()">← Lobby</span>
+    <span class="topbar-title">📡 ¡Fin de la partida!</span>
+    <span></span>
+  </div>
+  <div class="px125 pb2">
+    <div class="wl-winner-banner">
+      <div class="wl-winner-banner-title" id="wl-winner-team-name"></div>
+      <div>¡Ganó la partida! 🎉</div>
+    </div>
+    <div class="wl-score-row" id="wl-final-score-row"></div>
+    <button class="btn btn-success" onclick="finishGenericRound('wavelength')">🏁 Volver al lobby</button>
+  </div>
+</div>
+
 <!-- ===== MODAL GENÉRICO: CÓMO SE JUEGA ===== -->
 <div class="help-modal-overlay" id="help-modal-overlay" onclick="if(event.target===this) closeHelpModal()">
   <div class="help-modal-sheet">
@@ -981,6 +1159,7 @@
 <script src="js/game-herd.js"></script>
 <script src="js/game-hmp.js"></script>
 <script src="js/game-photos.js"></script>
+<script src="js/game-wavelength.js"></script>
 <script src="js/help-modal.js"></script>
 </body>
 </html>

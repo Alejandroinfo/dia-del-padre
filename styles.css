@@ -280,3 +280,48 @@
   .photo-answer-field-row .check-btn { border: 1px solid var(--color-border-secondary); border-radius: 999px; padding: 3px 10px; font-size: 11px; cursor: pointer; background: var(--color-background-primary); }
   .photo-answer-field-row .check-btn.checked { background: #3B6D11; color: #fff; border-color: #3B6D11; }
   .photo-correct-answers-banner { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 8px 12px; font-size: 12px; margin-bottom: 0.75rem; }
+
+  /* WAVELENGTH */
+  .wl-team-card { border: 2px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 1rem; margin-bottom: 0.75rem; }
+  .wl-team-card.team-a { border-color: #185FA5; background: #EAF2FB; }
+  .wl-team-card.team-b { border-color: #A32D2D; background: #FBEAEA; }
+  .wl-team-name { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .wl-team-a-label { color: #185FA5; }
+  .wl-team-b-label { color: #A32D2D; }
+  .wl-score-row { display: flex; justify-content: space-between; align-items: center; padding: 1rem; border-radius: var(--border-radius-lg); margin-bottom: 1rem; background: var(--color-background-secondary); }
+  .wl-score-side { text-align: center; flex: 1; }
+  .wl-score-num { font-size: 30px; font-weight: 700; }
+  .wl-score-label { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+  .wl-score-vs { font-size: 13px; color: var(--color-text-secondary); padding: 0 0.75rem; }
+  .wl-category-banner { background: linear-gradient(135deg, #5B4FC4, #3C3489); color: #fff; border-radius: var(--border-radius-lg); padding: 1.25rem; text-align: center; margin-bottom: 1rem; }
+  .wl-category-name { font-size: 18px; font-weight: 700; margin-bottom: 6px; }
+  .wl-category-extremes { display: flex; justify-content: space-between; font-size: 12px; opacity: 0.85; margin-top: 8px; }
+  .wl-psychic-number { font-size: 44px; font-weight: 800; text-align: center; color: #BA7517; margin: 0.5rem 0; }
+  .wl-slider-track-wrap { position: relative; margin: 1.5rem 0 2rem; }
+  .wl-slider-scale-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--color-text-secondary); margin-bottom: 6px; }
+  .wl-slider-track { position: relative; height: 14px; background: linear-gradient(90deg, #185FA5, #5B4FC4, #A32D2D); border-radius: 999px; margin: 0 12px; }
+  .wl-slider-handle {
+    position: absolute; top: 50%; width: 32px; height: 32px; border-radius: 50%;
+    background: #fff; border: 3px solid #1a1a1a; transform: translate(-50%, -50%); cursor: grab;
+    display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.25); touch-action: none; z-index: 5;
+  }
+  .wl-slider-handle:active { cursor: grabbing; }
+  .wl-slider-target-marker {
+    position: absolute; top: 50%; width: 4px; height: 30px; background: #1a1a1a;
+    transform: translate(-50%, -50%); border-radius: 2px; z-index: 4;
+  }
+  .wl-slider-zones { position: absolute; top: 0; left: 12px; right: 12px; height: 100%; display: flex; pointer-events: none; }
+  .wl-slider-value-readout { text-align: center; font-size: 22px; font-weight: 700; margin-top: 0.5rem; }
+  .wl-confirm-btn-wrap { margin-top: 1.5rem; }
+  .wl-guess-lr-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 1.5rem 0; }
+  .wl-lr-btn { padding: 20px; border-radius: var(--border-radius-lg); font-size: 16px; font-weight: 700; cursor: pointer; border: 1px solid var(--color-border-tertiary); background: var(--color-background-primary); transition: all 0.15s; text-align: center; }
+  .wl-lr-btn:hover { background: var(--color-background-secondary); }
+  .wl-lr-btn.selected { border-color: #185FA5; background: #EAF2FB; }
+  .wl-result-reveal { text-align: center; padding: 1rem; }
+  .wl-result-number { font-size: 48px; font-weight: 800; color: #BA7517; margin: 0.5rem 0; }
+  .wl-points-breakdown { background: var(--color-background-secondary); border-radius: var(--border-radius-md); padding: 12px 14px; font-size: 14px; margin: 1rem 0; }
+  .wl-points-breakdown div { margin-bottom: 4px; }
+  .wl-winner-banner { background: linear-gradient(135deg, #BA7517, #854F0B); color: #fff; border-radius: var(--border-radius-lg); padding: 1.5rem; text-align: center; margin-bottom: 1rem; }
+  .wl-winner-banner-title { font-size: 22px; font-weight: 800; margin-bottom: 4px; }
+  .wl-psychic-tag { display: inline-block; background: #FAC775; color: #633806; font-size: 12px; font-weight: 700; padding: 4px 10px; border-radius: 999px; margin-bottom: 0.5rem; }
