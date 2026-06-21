@@ -1,7 +1,7 @@
 // ============================================================
 // GALERÍA DE RECUERDOS (fotos con preguntas)
 // ============================================================
-const PHOTO_MAX_COUNT = 20;
+const PHOTO_MAX_COUNT = 40;
 const PHOTO_MAX_WIDTH = 800;
 const PHOTO_JPEG_QUALITY = 0.7;
 let photoQueue = []; // [{ dataUrl, lugar, anio, evento, fileName }]
@@ -21,29 +21,46 @@ function goToPhotoSetup() {
 }
 
 function normalizeFileName(name) {
-  return (name || '').toString().toLowerCase().trim();
+  return (name || '').toString().toLowerCase().trim()
+    .replace(/á/g,'a').replace(/é/g,'e').replace(/í/g,'i').replace(/ó/g,'o').replace(/ú/g,'u').replace(/ñ/g,'n')
+    .replace(/\.[a-z0-9]+$/i, '')   // quita la extensión (.jpg, .JPG, .png, .jpeg...)
+    .replace(/\s*\(\d+\)\s*$/, '')  // quita sufijos tipo " (1)" que agregan los celulares al duplicar
+    .replace(/[\s_-]+/g, '');       // quita espacios, guiones y guiones bajos para comparar solo letras/números
 }
 
 function processPhotoFactsRows(rows) {
   photoFactsMap = {};
-  let count = 0;
+  const originalNames = [];
+  let duplicates = 0;
   rows.forEach(r => {
-    const key = normalizeFileName(r.nombre_archivo);
+    const rawName = (r.nombre_archivo || '').toString().trim();
+    const key = normalizeFileName(rawName);
     if (!key) return;
+    if (photoFactsMap[key]) duplicates++;
     photoFactsMap[key] = { lugar: r.lugar || '', anio: (r.anio || '').toString(), evento: r.evento || '' };
-    count++;
+    originalNames.push(rawName);
   });
   document.getElementById('photo-facts-sheet-picker').style.display = 'none';
   const statusEl = document.getElementById('photo-facts-status');
   statusEl.style.display = 'block';
-  statusEl.textContent = count
-    ? `✅ Ficha cargada con ${count} fotos. Súbelas a continuación y se completarán automáticamente por nombre de archivo.`
-    : '⚠️ No se encontraron filas válidas. Verifica la columna "nombre_archivo".';
+  const count = originalNames.length;
+  if (!count) {
+    statusEl.innerHTML = '⚠️ No se encontraron filas válidas. Verifica que el archivo tenga una columna llamada exactamente "nombre_archivo".';
+  } else {
+    let html = `✅ Ficha cargada con ${count} fotos esperadas.`;
+    if (duplicates > 0) html += ` ⚠️ ${duplicates} nombre(s) duplicado(s) (se usó el último valor).`;
+    html += `<div class="upload-preview" style="margin-top:8px;max-height:120px;">` +
+      originalNames.map(n => `<div class="upload-preview-row">📄 ${n}</div>`).join('') + `</div>` +
+      `<div class="text-sm" style="margin-top:6px;">Sube ahora las fotos con <b>estos mismos nombres de archivo</b> (sin importar mayúsculas, tildes o la extensión).</div>`;
+    statusEl.innerHTML = html;
+  }
   // Re-apply to any already-uploaded photos waiting in the queue
+  let reapplied = 0;
   photoQueue.forEach(p => {
     const fact = photoFactsMap[normalizeFileName(p.fileName)];
     if (fact && !p.lugar && !p.anio && !p.evento) {
       p.lugar = fact.lugar; p.anio = fact.anio; p.evento = fact.evento;
+      reapplied++;
     }
   });
   renderPhotoSetupUI();
@@ -57,11 +74,15 @@ function pickPhotoFactsSheet(sheetName) {
 function handlePhotoFactsFileUpload(event) {
   const file = event.target.files[0];
   if (!file) return;
-  parseUploadedFile(file, processPhotoFactsRows, () => alert('No se pudo leer el archivo. Verifica el formato.'),
-    (sheetNames, getRowsForSheet) => {
-      window.__photoFactsGetRowsForSheet = getRowsForSheet;
-      renderSheetPicker('photo-facts-sheet-picker', sheetNames, 'pickPhotoFactsSheet');
-    });
+  document.getElementById('photo-facts-status').style.display = 'none';
+  parseUploadedFile(file, processPhotoFactsRows, (err) => {
+    console.error('Error al leer el archivo de fichas:', err);
+    alert('No se pudo leer el archivo. Verifica que sea un .csv, .xlsx o .json válido, y que tenga la columna "nombre_archivo".');
+  }, (sheetNames, getRowsForSheet) => {
+    window.__photoFactsGetRowsForSheet = getRowsForSheet;
+    renderSheetPicker('photo-facts-sheet-picker', sheetNames, 'pickPhotoFactsSheet');
+  });
+  event.target.value = ''; // permite volver a subir el mismo archivo si se necesita reintentar
 }
 
 function compressImageFile(file) {
@@ -144,14 +165,20 @@ function renderPhotoSetupUI() {
     </div>
   `).join('');
 
-  document.getElementById('photo-question-forms').innerHTML = photoQueue.map((p, i) => `
+  document.getElementById('photo-question-forms').innerHTML = photoQueue.map((p, i) => {
+    const hasMatch = p.fileName && photoFactsMap[normalizeFileName(p.fileName)];
+    const matchBadge = p.fileName
+      ? (hasMatch ? ' <span style="color:#3B6D11;">✓ ficha encontrada</span>' : ' <span style="color:#A32D2D;">sin ficha — llena a mano</span>')
+      : '';
+    return `
     <div class="photo-fact-card">
-      <div class="section-label">FICHA DE LA FOTO ${i+1}${p.fileName ? ' — '+p.fileName : ''}</div>
+      <div class="section-label">FICHA DE LA FOTO ${i+1}${p.fileName ? ' — '+p.fileName : ''}${matchBadge}</div>
       <div class="photo-fact-row"><label>📍 Lugar</label><input type="text" placeholder="Ej: Playa del Carmen" value="${p.lugar}" oninput="updatePhotoFact(${i}, 'lugar', this.value)"></div>
       <div class="photo-fact-row"><label>📅 Año</label><input type="text" placeholder="Ej: 2015" inputmode="numeric" value="${p.anio}" oninput="updatePhotoFact(${i}, 'anio', this.value)"></div>
       <div class="photo-fact-row"><label>🎉 Evento</label><input type="text" placeholder="Ej: Cumpleaños de papá" value="${p.evento}" oninput="updatePhotoFact(${i}, 'evento', this.value)"></div>
     </div>
-  `).join('');
+  `;
+  }).join('');
 
   const btn = document.getElementById('photo-start-btn');
   btn.style.display = photoQueue.length ? 'block' : 'none';
@@ -240,6 +267,11 @@ async function startPhotoGallery() {
   if (!photoQueue.length) { alert('Sube al menos una foto'); return; }
   const missingAll = photoQueue.some(p => !p.lugar.trim() && !p.anio.trim() && !p.evento.trim());
   if (missingAll && !confirm('Algunas fotos no tienen ningún dato de ficha. ¿Continuar igual?')) return;
+
+  const totalSizeMB = photoQueue.reduce((sum, p) => sum + (p.dataUrl.length / 1024 / 1024), 0);
+  if (totalSizeMB > 8.5) {
+    if (!confirm(`El conjunto de fotos pesa ~${totalSizeMB.toFixed(1)} MB, cerca del límite de la base de datos. Puede que falle al guardar. ¿Quieres continuar igual? (Si falla, intenta con menos fotos o fotos más simples)`)) return;
+  }
 
   const room = await getRoomData(state.roomCode);
   room.gameState.photoQueue = photoQueue;

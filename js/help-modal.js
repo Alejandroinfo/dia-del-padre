@@ -137,7 +137,7 @@ const HELP_CONTENT = {
 
       <div class="help-section-label">Cómo se juega</div>
       <ul class="help-step-list">
-        <li class="help-step"><span class="help-step-num">1</span><span>El host sube fotos (o cualquiera las propone de antemano) y llena una ficha rápida por foto: 📍 Lugar, 📅 Año, 🎉 Evento.</span></li>
+        <li class="help-step"><span class="help-step-num">1</span><span>El host sube hasta 40 fotos (o cualquiera las propone de antemano) y llena una ficha rápida por foto: 📍 Lugar, 📅 Año, 🎉 Evento.</span></li>
         <li class="help-step"><span class="help-step-num">2</span><span>Se muestra cada foto a todos, sin la ficha visible.</span></li>
         <li class="help-step"><span class="help-step-num">3</span><span>Cada jugador escribe su mejor intento de Lugar, Año y Evento desde su celular.</span></li>
         <li class="help-step"><span class="help-step-num">4</span><span>El host revisa las respuestas de cada jugador y marca cuáles campos acertaron.</span></li>
